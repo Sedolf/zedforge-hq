@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Zedforge Studio — Command HQ</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --navy:#042C53;--blue:#185FA5;--accent:#378ADD;--light:#E6F1FB;--pale:#B5D4F4;
+  --white:#ffffff;--gray:#f4f7fb;--text:#0d1b2a;--muted:#5a7a9a;
+  --border:rgba(24,95,165,0.12);--dark:#031829;
+  --green:#1D9E75;--amber:#EF9F27;--red:#E24B4A;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;font-family:'Space Grotesk',sans-serif;font-size:13px;background:var(--gray);}
+.app{display:flex;height:100vh;overflow:hidden;}
+
+/* SIDEBAR */
+.sb{width:220px;flex-shrink:0;background:var(--navy);display:flex;flex-direction:column;overflow-y:auto;}
+.sb-head{padding:1rem;border-bottom:0.5px solid #0C447C;}
+.sb-logo{font-size:14px;font-weight:700;color:var(--light);letter-spacing:0.04em;}
+.sb-logo span{color:var(--accent);}
+.sb-tagline{font-size:9px;color:var(--accent);margin-top:2px;letter-spacing:0.08em;}
+.sb-sec{padding:0.6rem 1rem 0.2rem;font-size:9px;letter-spacing:0.12em;color:#185FA5;text-transform:uppercase;font-weight:600;}
+.sb-item{display:flex;align-items:center;gap:8px;padding:7px 1rem;font-size:11px;color:#6b8aaa;cursor:pointer;border-left:2px solid transparent;transition:all 0.15s;}
+.sb-item:hover{color:#B5D4F4;background:rgba(255,255,255,0.04);}
+.sb-item.active{color:#E6F1FB;background:rgba(55,138,221,0.12);border-left-color:var(--accent);}
+.sb-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.sb-foot{margin-top:auto;padding:0.75rem 1rem;border-top:0.5px solid #0C447C;background:#031829;}
+.sb-foot-name{font-size:12px;font-weight:500;color:#B5D4F4;}
+.sb-foot-role{font-size:10px;color:var(--accent);}
+.sb-foot-badge{display:inline-block;font-size:9px;padding:1px 7px;border-radius:99px;background:var(--blue);color:var(--light);margin-top:3px;}
+
+/* MAIN */
+.main{flex:1;overflow-y:auto;display:flex;flex-direction:column;}
+.topbar{background:var(--white);border-bottom:0.5px solid var(--border);padding:0 1.5rem;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.topbar-title{font-size:14px;font-weight:600;color:var(--text);}
+.topbar-actions{display:flex;gap:8px;align-items:center;}
+.tb-btn{padding:6px 14px;font-size:11px;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:500;transition:all 0.2s;}
+.tb-btn-primary{background:var(--blue);color:white;border:none;}
+.tb-btn-primary:hover{background:var(--accent);}
+.tb-btn-ghost{background:transparent;border:0.5px solid var(--border);color:var(--muted);}
+.tb-btn-ghost:hover{background:var(--gray);}
+.content{padding:1.25rem;flex:1;}
+
+/* CARDS */
+.card{background:var(--white);border:0.5px solid var(--border);border-radius:12px;padding:1rem 1.125rem;margin-bottom:12px;}
+.card-title{font-size:12px;font-weight:600;color:var(--text);margin-bottom:10px;}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:12px;}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:12px;}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:12px;}
+.metric{background:var(--gray);border-radius:8px;padding:0.875rem;}
+.metric-label{font-size:10px;color:var(--muted);margin-bottom:3px;}
+.metric-val{font-size:20px;font-weight:700;color:var(--text);}
+.metric-note{font-size:10px;color:var(--muted);margin-top:2px;}
+
+/* LABELS */
+.lbl{font-size:9px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.badge{display:inline-block;font-size:10px;padding:2px 9px;border-radius:99px;}
+.bg{background:var(--gray);color:var(--muted);}
+.bb{background:#E6F1FB;color:#0C447C;}
+.bgr{background:#EAF3DE;color:#27500A;}
+.bam{background:#FAEEDA;color:#633806;}
+.bred{background:#FCEBEB;color:#791F1F;}
+.bpu{background:#EEEDFE;color:#3C3489;}
+
+/* INFO ROWS */
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:0.5px solid var(--border);}
+.info-row:last-child{border-bottom:none;}
+.ik{font-size:11px;color:var(--muted);}
+.iv{font-size:11px;font-weight:500;color:var(--text);text-align:right;max-width:240px;}
+
+/* PROGRESS */
+.prog-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.prog-lbl{font-size:11px;color:var(--text);min-width:150px;}
+.prog-bar{flex:1;height:4px;background:var(--gray);border-radius:99px;overflow:hidden;}
+.prog-fill{height:100%;background:var(--blue);border-radius:99px;transition:width 0.4s;}
+.prog-pct{font-size:10px;color:var(--muted);min-width:30px;text-align:right;}
+
+/* TASKS */
+.task-row{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--gray);border-radius:8px;margin-bottom:5px;cursor:pointer;transition:background 0.1s;}
+.task-row:hover{background:#e8eef5;}
+.tcheck{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+.tcheck.done{background:var(--blue);border-color:var(--blue);}
+.tcheck.done::after{content:'';display:block;width:4px;height:7px;border:1.5px solid white;border-top:none;border-left:none;transform:rotate(45deg) translateY(-1px);}
+.tlbl{flex:1;font-size:11px;color:var(--text);}
+.tlbl.done{color:var(--muted);text-decoration:line-through;}
+.ttag{font-size:9px;padding:2px 7px;border-radius:99px;background:var(--white);color:var(--muted);border:0.5px solid var(--border);white-space:nowrap;}
+
+/* PRODUCT CARDS */
+.prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;}
+.prod-card{background:var(--white);border:0.5px solid var(--border);border-radius:12px;overflow:hidden;transition:box-shadow 0.2s;}
+.prod-card:hover{box-shadow:0 4px 20px rgba(24,95,165,0.08);}
+.prod-card-head{height:80px;display:flex;align-items:center;justify-content:center;font-size:32px;position:relative;}
+.prod-card-body{padding:0.875rem;}
+.prod-card-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px;}
+.prod-card-type{font-size:10px;color:var(--muted);margin-bottom:8px;}
+.prod-card-desc{font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:10px;}
+.prod-card-link{font-size:11px;color:var(--blue);text-decoration:none;display:inline-flex;align-items:center;gap:4px;}
+.prod-card-link:hover{color:var(--accent);}
+.prod-card-status{position:absolute;top:8px;right:8px;font-size:9px;padding:2px 8px;border-radius:99px;}
+
+/* SITE EDITOR */
+.editor-section{background:var(--gray);border-radius:8px;padding:1rem;margin-bottom:10px;}
+.editor-section-title{font-size:11px;font-weight:600;color:var(--text);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;}
+.form-group{margin-bottom:10px;}
+.form-label{font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;display:block;}
+.form-input{width:100%;padding:8px 10px;border:0.5px solid var(--border);border-radius:6px;font-size:12px;font-family:inherit;color:var(--text);background:var(--white);outline:none;transition:border-color 0.2s;}
+.form-input:focus{border-color:var(--blue);}
+textarea.form-input{resize:vertical;min-height:70px;}
+.form-btn{padding:8px 18px;font-size:11px;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:600;border:none;transition:all 0.2s;}
+.form-btn-primary{background:var(--blue);color:white;}
+.form-btn-primary:hover{background:var(--accent);}
+.form-btn-success{background:var(--green);color:white;}
+.form-btn-danger{background:var(--red);color:white;}
+
+/* SETTINGS */
+.settings-box{background:var(--gray);border-radius:8px;padding:1rem;margin-bottom:10px;}
+.token-display{font-family:monospace;font-size:11px;color:var(--muted);background:var(--white);padding:8px 10px;border-radius:6px;border:0.5px solid var(--border);word-break:break-all;margin-top:6px;}
+
+/* IDEAS */
+.idea-row{display:flex;align-items:flex-start;gap:8px;padding:7px 10px;background:var(--gray);border-radius:8px;margin-bottom:5px;font-size:11px;color:var(--text);}
+.idea-dot{width:5px;height:5px;border-radius:50%;background:var(--blue);flex-shrink:0;margin-top:3px;}
+.idea-del{margin-left:auto;font-size:10px;color:var(--muted);cursor:pointer;padding:0 2px;flex-shrink:0;}
+.idea-del:hover{color:var(--red);}
+.add-row{display:flex;gap:7px;margin-top:8px;}
+.add-inp{flex:1;font-size:12px;padding:7px 10px;border:0.5px solid var(--border);border-radius:6px;background:var(--white);color:var(--text);outline:none;font-family:inherit;}
+.add-inp:focus{border-color:var(--blue);}
+.add-btn{padding:7px 14px;font-size:12px;background:var(--blue);color:white;border:none;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:600;}
+
+/* TOAST */
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;padding:10px 18px;border-radius:8px;font-size:12px;font-weight:500;color:white;z-index:9999;transform:translateY(100px);opacity:0;transition:all 0.3s ease;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.success{background:var(--green);}
+.toast.error{background:var(--red);}
+.toast.info{background:var(--blue);}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:1000;display:none;align-items:center;justify-content:center;}
+.modal-overlay.show{display:flex;}
+.modal-box{background:var(--white);border-radius:12px;padding:1.5rem;width:90%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,0.2);}
+.modal-title{font-size:15px;font-weight:600;color:var(--text);margin-bottom:1rem;}
+.modal-close{float:right;cursor:pointer;color:var(--muted);font-size:16px;line-height:1;}
+
+/* STATUS INDICATOR */
+.status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px;}
+.status-live{background:var(--green);}
+.status-pending{background:var(--amber);}
+.status-off{background:var(--muted);}
+
+/* LINKS */
+.site-link{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--blue);text-decoration:none;padding:4px 10px;border-radius:6px;background:var(--light);transition:all 0.2s;}
+.site-link:hover{background:var(--pale);}
+
+/* PHASE */
+.phase{display:flex;gap:10px;padding:9px 10px;background:var(--gray);border-radius:8px;margin-bottom:7px;align-items:flex-start;}
+.phase-n{width:24px;height:24px;border-radius:50%;background:var(--blue);color:white;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.phase-n.done{background:var(--green);}
+.phase-title{font-size:12px;font-weight:500;color:var(--text);margin-bottom:2px;}
+.phase-desc{font-size:11px;color:var(--muted);line-height:1.5;}
+.phase-time{font-size:10px;color:var(--blue);margin-top:3px;}
+
+@media(max-width:640px){.sb{width:180px;}.grid4{grid-template-columns:repeat(2,minmax(0,1fr));}}
+</style>
+</head>
+<body>
+
+<div class="app">
+<!-- SIDEBAR -->
+<div class="sb">
+  <div class="sb-head">
+    <div class="sb-logo">ZEDFORGE <span>STUDIO</span></div>
+    <div class="sb-tagline">COMMAND HQ</div>
+  </div>
+  <div class="sb-sec">Overview</div>
+  <div class="sb-item active" onclick="nav('dashboard')"><div class="sb-dot" style="background:var(--accent);"></div>Dashboard</div>
+  <div class="sb-item" onclick="nav('profile')"><div class="sb-dot" style="background:var(--accent);"></div>Company profile</div>
+  <div class="sb-sec">Sites</div>
+  <div class="sb-item" onclick="nav('mainsite')"><div class="sb-dot" style="background:#5DCAA5;"></div>Main website</div>
+  <div class="sb-item" onclick="nav('lorewell')"><div class="sb-dot" style="background:#7F77DD;"></div>Lorewell</div>
+  <div class="sb-sec">Products</div>
+  <div class="sb-item" onclick="nav('sgc')"><div class="sb-dot" style="background:var(--amber);"></div>Shadow Gate Chronicles</div>
+  <div class="sb-item" onclick="nav('snakes')"><div class="sb-dot" style="background:var(--amber);"></div>Snakes Evolution</div>
+  <div class="sb-sec">Business</div>
+  <div class="sb-item" onclick="nav('bizplan')"><div class="sb-dot" style="background:var(--accent);"></div>Business plan</div>
+  <div class="sb-item" onclick="nav('legal')"><div class="sb-dot" style="background:var(--amber);"></div>Legal & structure</div>
+  <div class="sb-sec">Admin</div>
+  <div class="sb-item" onclick="nav('tasks')"><div class="sb-dot" style="background:var(--accent);"></div>All tasks</div>
+  <div class="sb-item" onclick="nav('brainstorm')"><div class="sb-dot" style="background:var(--accent);"></div>Brainstorm</div>
+  <div class="sb-item" onclick="nav('editor')"><div class="sb-dot" style="background:var(--green);"></div>Site editor</div>
+  <div class="sb-item" onclick="nav('golive')"><div class="sb-dot" style="background:var(--amber);"></div>Go live</div>
+  <div class="sb-item" onclick="nav('settings')"><div class="sb-dot" style="background:var(--muted);"></div>Settings</div>
+  <div class="sb-foot">
+    <div class="sb-foot-name">Sedolf Adjei</div>
+    <div class="sb-foot-role">Co-founder & CEO</div>
+    <div class="sb-foot-badge">Admin</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="topbar-title">Dashboard</div>
+    <div class="topbar-actions">
+      <a href="https://zedforge-studio.vercel.app" target="_blank" class="site-link">🌐 Main site</a>
+      <a href="https://lorewell.vercel.app" target="_blank" class="site-link">📚 Lorewell</a>
+      <a href="https://zedforgestudio.itch.io" target="_blank" class="site-link">🎮 itch.io</a>
+    </div>
+  </div>
+
+  <div class="content">
+
+  <!-- DASHBOARD -->
+  <div id="pg-dashboard" class="pg">
+    <div class="grid4">
+      <div class="metric"><div class="metric-label">Overall progress</div><div class="metric-val" id="d-pct">0%</div></div>
+      <div class="metric"><div class="metric-label">Tasks done</div><div class="metric-val" id="d-done">0</div><div class="metric-note" id="d-total-note">of 0 total</div></div>
+      <div class="metric"><div class="metric-label">Live sites</div><div class="metric-val">2</div><div class="metric-note">Main + Lorewell</div></div>
+      <div class="metric"><div class="metric-label">Products</div><div class="metric-val">3</div><div class="metric-note">SGC · SE · Lorewell</div></div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title">Progress by section</div>
+        <div id="d-progress"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Next actions</div>
+        <div id="d-next"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Live sites</div>
+      <div class="grid3" style="margin-bottom:0;">
+        <div style="padding:10px;background:var(--gray);border-radius:8px;">
+          <div style="display:flex;align-items:center;margin-bottom:4px;"><span class="status-dot status-live"></span><span style="font-size:11px;font-weight:600;color:var(--text);">Zedforge Studio</span></div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:8px;">zedforge-studio.vercel.app</div>
+          <a href="https://zedforge-studio.vercel.app" target="_blank" class="site-link" style="font-size:10px;">Visit site →</a>
+        </div>
+        <div style="padding:10px;background:var(--gray);border-radius:8px;">
+          <div style="display:flex;align-items:center;margin-bottom:4px;"><span class="status-dot status-live"></span><span style="font-size:11px;font-weight:600;color:var(--text);">Lorewell</span></div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:8px;">lorewell.vercel.app</div>
+          <a href="https://lorewell.vercel.app" target="_blank" class="site-link" style="font-size:10px;">Visit site →</a>
+        </div>
+        <div style="padding:10px;background:var(--gray);border-radius:8px;">
+          <div style="display:flex;align-items:center;margin-bottom:4px;"><span class="status-dot status-live"></span><span style="font-size:11px;font-weight:600;color:var(--text);">itch.io</span></div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:8px;">zedforgestudio.itch.io</div>
+          <a href="https://zedforgestudio.itch.io" target="_blank" class="site-link" style="font-size:10px;">Visit page →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFILE -->
+  <div id="pg-profile" class="pg" style="display:none;">
+    <div class="grid2">
+      <div class="card">
+        <div class="lbl">Co-founders</div>
+        <div class="info-row"><div class="ik">Founder 1</div><div class="iv">Sedolf Adjei</div></div>
+        <div class="info-row"><div class="ik">Role</div><div class="iv">Co-founder & CEO</div></div>
+        <div class="info-row"><div class="ik">Email</div><div class="iv">sedolfadjei@gmail.com</div></div>
+        <div class="info-row"><div class="ik">Phone</div><div class="iv">+233535314711</div></div>
+        <div class="info-row"><div class="ik">Location</div><div class="iv">Kumasi, Ghana</div></div>
+        <div class="info-row"><div class="ik">Founder 2</div><div class="iv">Prince Nti Baah</div></div>
+        <div class="info-row"><div class="ik">Role</div><div class="iv">Co-founder</div></div>
+      </div>
+      <div class="card">
+        <div class="lbl">Company</div>
+        <div class="info-row"><div class="ik">Name</div><div class="iv">Zedforge Studio</div></div>
+        <div class="info-row"><div class="ik">Tagline</div><div class="iv">Forged for the future.</div></div>
+        <div class="info-row"><div class="ik">Focus</div><div class="iv">Apps · Games · Software · IT services</div></div>
+        <div class="info-row"><div class="ik">Market</div><div class="iv">Global</div></div>
+        <div class="info-row"><div class="ik">Revenue</div><div class="iv">App/game sales + IT services</div></div>
+        <div class="info-row"><div class="ik">Primary color</div><div class="iv"><span style="display:inline-block;width:10px;height:10px;background:#185FA5;border-radius:2px;margin-right:4px;vertical-align:middle;"></span>#185FA5</div></div>
+        <div class="info-row"><div class="ik">Typography</div><div class="iv">Space Grotesk</div></div>
+        <div class="info-row"><div class="ik">itch.io</div><div class="iv">zedforgestudio.itch.io</div></div>
+        <div class="info-row"><div class="ik">Stage</div><div class="iv"><span class="badge bam">Pre-launch</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN SITE -->
+  <div id="pg-mainsite" class="pg" style="display:none;">
+    <div class="card">
+      <div class="lbl">Site details</div>
+      <div class="info-row"><div class="ik">URL</div><div class="iv"><a href="https://zedforge-studio.vercel.app" target="_blank" style="color:var(--blue);">zedforge-studio.vercel.app</a></div></div>
+      <div class="info-row"><div class="ik">GitHub repo</div><div class="iv">Sedolf/zedforge-studio</div></div>
+      <div class="info-row"><div class="ik">Hosting</div><div class="iv">Vercel (free)</div></div>
+      <div class="info-row"><div class="ik">Pages</div><div class="iv">Home · Products · Services · About · Contact</div></div>
+      <div class="info-row"><div class="ik">Status</div><div class="iv"><span class="badge bgr">Live ✓</span></div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Tasks</div>
+      <div id="mainsite-tasks"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">To add a new product to the main site</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.7;">Go to the <strong style="color:var(--text);">Site Editor</strong> section in the sidebar. Fill in the product details and click "Push to GitHub" — Vercel will automatically redeploy your site with the new product added.</div>
+    </div>
+  </div>
+
+  <!-- LOREWELL -->
+  <div id="pg-lorewell" class="pg" style="display:none;">
+    <div class="card">
+      <div class="lbl">Platform details</div>
+      <div class="info-row"><div class="ik">URL</div><div class="iv"><a href="https://lorewell.vercel.app" target="_blank" style="color:var(--blue);">lorewell.vercel.app</a></div></div>
+      <div class="info-row"><div class="ik">Tagline</div><div class="iv">Explore the world's cultures.</div></div>
+      <div class="info-row"><div class="ik">Regions</div><div class="iv">Africa · Asia · Europe · Americas · Oceania</div></div>
+      <div class="info-row"><div class="ik">Stories live</div><div class="iv">14 cultural stories & legends</div></div>
+      <div class="info-row"><div class="ik">Status</div><div class="iv"><span class="badge bgr">Live ✓</span></div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Lorewell tasks</div>
+      <div id="lorewell-tasks"></div>
+    </div>
+  </div>
+
+  <!-- SGC -->
+  <div id="pg-sgc" class="pg" style="display:none;">
+    <div class="card">
+      <div class="lbl">Game details</div>
+      <div class="info-row"><div class="ik">Name</div><div class="iv">Shadow Gate Chronicles</div></div>
+      <div class="info-row"><div class="ik">Genre</div><div class="iv">Action RPG · Dark Fantasy</div></div>
+      <div class="info-row"><div class="ik">Platform</div><div class="iv">Browser / Web</div></div>
+      <div class="info-row"><div class="ik">Key hook</div><div class="iv">Class selection + progressive boss fights</div></div>
+      <div class="info-row"><div class="ik">Price</div><div class="iv">Free with donations</div></div>
+      <div class="info-row"><div class="ik">itch.io page</div><div class="iv"><a href="https://zedforgestudio.itch.io" target="_blank" style="color:var(--blue);">zedforgestudio.itch.io</a></div></div>
+      <div class="info-row"><div class="ik">Build status</div><div class="iv"><span class="badge bgr">Built ✓</span></div></div>
+      <div class="info-row"><div class="ik">Publish status</div><div class="iv"><span class="badge bam">Not published yet</span></div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Publish checklist</div>
+      <div id="sgc-tasks"></div>
+    </div>
+  </div>
+
+  <!-- SNAKES -->
+  <div id="pg-snakes" class="pg" style="display:none;">
+    <div class="card">
+      <div class="lbl">Game details</div>
+      <div class="info-row"><div class="ik">Name</div><div class="iv">Snakes Evolution</div></div>
+      <div class="info-row"><div class="ik">Genre</div><div class="iv">Arcade / Casual</div></div>
+      <div class="info-row"><div class="ik">Platform</div><div class="iv">Browser / Web</div></div>
+      <div class="info-row"><div class="ik">Key hook</div><div class="iv">3 stages + 3 difficulty levels</div></div>
+      <div class="info-row"><div class="ik">Price</div><div class="iv">Free with donations</div></div>
+      <div class="info-row"><div class="ik">itch.io page</div><div class="iv"><a href="https://zedforgestudio.itch.io" target="_blank" style="color:var(--blue);">zedforgestudio.itch.io</a></div></div>
+      <div class="info-row"><div class="ik">Build status</div><div class="iv"><span class="badge bgr">Built ✓</span></div></div>
+      <div class="info-row"><div class="ik">Publish status</div><div class="iv"><span class="badge bam">Not published yet</span></div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Publish checklist</div>
+      <div id="snakes-tasks"></div>
+    </div>
+  </div>
+
+  <!-- BIZ PLAN -->
+  <div id="pg-bizplan" class="pg" style="display:none;">
+    <div class="card">
+      <div class="card-title">Mission</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.7;">Zedforge Studio is a two-person global studio building immersive games, powerful software, and a world-class culture platform — while offering IT services to clients worldwide. We ship quality products that resonate with real people, starting lean and growing through excellence.</div>
+    </div>
+    <div class="grid3">
+      <div class="metric"><div class="metric-label">Revenue streams</div><div class="metric-val" style="font-size:13px;padding-top:4px;">Sales + IT services</div></div>
+      <div class="metric"><div class="metric-label">Products</div><div class="metric-val">3</div><div class="metric-note">2 games + 1 platform</div></div>
+      <div class="metric"><div class="metric-label">Founders</div><div class="metric-val">2</div><div class="metric-note">Sedolf + Prince</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Launch order & roadmap</div>
+      <div class="phase"><div class="phase-n done">✓</div><div><div class="phase-title">Lock brand identity</div><div class="phase-desc">Name, tagline, colors, logo system — all locked.</div><div class="phase-time">Complete ✓</div></div></div>
+      <div class="phase"><div class="phase-n done">✓</div><div><div class="phase-title">Launch zedforge-studio.vercel.app</div><div class="phase-desc">Main studio website live with all 5 pages.</div><div class="phase-time">Complete ✓</div></div></div>
+      <div class="phase"><div class="phase-n done">✓</div><div><div class="phase-title">Launch Lorewell</div><div class="phase-desc">Culture platform live with 14 stories across 5 continents.</div><div class="phase-time">Complete ✓</div></div></div>
+      <div class="phase"><div class="phase-n">4</div><div><div class="phase-title">Publish games on itch.io</div><div class="phase-desc">Upload Shadow Gate Chronicles & Snakes Evolution to itch.io and link from main site.</div><div class="phase-time">Next step</div></div></div>
+      <div class="phase"><div class="phase-n">5</div><div><div class="phase-title">Register Zedforge Studio legally</div><div class="phase-desc">Ghana Ltd registration + Wise/Payoneer for global payments.</div><div class="phase-time">Months 2–3</div></div></div>
+      <div class="phase"><div class="phase-n">6</div><div><div class="phase-title">Take on first IT clients</div><div class="phase-desc">Offer custom software dev + IT support to paying clients.</div><div class="phase-time">Months 3–6</div></div></div>
+    </div>
+  </div>
+
+  <!-- LEGAL -->
+  <div id="pg-legal" class="pg" style="display:none;">
+    <div class="card">
+      <div class="lbl">Details</div>
+      <div class="info-row"><div class="ik">Founders</div><div class="iv">Sedolf Adjei · Prince Nti Baah</div></div>
+      <div class="info-row"><div class="ik">Based in</div><div class="iv">Kumasi, Ghana</div></div>
+      <div class="info-row"><div class="ik">Company type</div><div class="iv" id="l-type"><span class="badge bam">Not decided</span></div></div>
+      <div class="info-row"><div class="ik">Registration country</div><div class="iv" id="l-country"><span class="badge bam">Not decided</span></div></div>
+      <div class="info-row"><div class="ik">Business bank</div><div class="iv" id="l-bank"><span class="badge bg">Not opened</span></div></div>
+      <div class="info-row"><div class="ik">Global payments</div><div class="iv" id="l-pay"><span class="badge bg">Not set up</span></div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Legal tasks</div>
+      <div id="legal-tasks"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Recommendation</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.7;">Register as a <strong style="color:var(--text);">Limited Liability Company (Ltd)</strong> with Ghana's Registrar General's Department. For global payments, set up <strong style="color:var(--text);">Wise Business</strong> or <strong style="color:var(--text);">Payoneer</strong>. For Stripe + US banking, consider a <strong style="color:var(--text);">US LLC via Stripe Atlas</strong> (~$500 one-time). Create your <strong style="color:var(--text);">Apple Developer</strong> ($99/yr) and <strong style="color:var(--text);">Google Play</strong> ($25 one-time) accounts when ready to go mobile.</div>
+    </div>
+  </div>
+
+  <!-- ALL TASKS -->
+  <div id="pg-tasks" class="pg" style="display:none;">
+    <div id="all-tasks"></div>
+  </div>
+
+  <!-- BRAINSTORM -->
+  <div id="pg-brainstorm" class="pg" style="display:none;">
+    <div class="card">
+      <div class="card-title">Ideas, notes & decisions</div>
+      <div class="add-row">
+        <input class="add-inp" id="idea-inp" placeholder="Add an idea, note or decision..." onkeydown="if(event.key==='Enter')addIdea()"/>
+        <button class="add-btn" onclick="addIdea()">Add</button>
+      </div>
+      <div style="margin-top:10px;" id="ideas-list"></div>
+    </div>
+  </div>
+
+  <!-- SITE EDITOR -->
+  <div id="pg-editor" class="pg" style="display:none;">
+    <div class="card">
+      <div class="card-title">Add a new product to zedforgestudio.com</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:1rem;">Fill in the details below and click "Push to GitHub". Vercel will automatically redeploy your site with the new product added — no coding needed.</div>
+      <div id="github-warning" style="background:#FAEEDA;border:0.5px solid #EF9F27;border-radius:8px;padding:10px 14px;font-size:11px;color:#633806;margin-bottom:1rem;display:none;">⚠️ GitHub token not set. Go to <strong>Settings</strong> to add your token first.</div>
+      <div class="editor-section">
+        <div class="editor-section-title">Product details</div>
+        <div class="grid2">
+          <div class="form-group">
+            <label class="form-label">Product name</label>
+            <input type="text" class="form-input" id="new-name" placeholder="e.g. Task Master Pro"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Product type</label>
+            <select class="form-input" id="new-type">
+              <option>Browser Game</option>
+              <option>Mobile App</option>
+              <option>Desktop Software</option>
+              <option>Web Platform</option>
+              <option>IT Service</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Short description</label>
+          <textarea class="form-input" id="new-desc" placeholder="What does this product do? (1-2 sentences)"></textarea>
+        </div>
+        <div class="grid2">
+          <div class="form-group">
+            <label class="form-label">Link URL</label>
+            <input type="text" class="form-input" id="new-url" placeholder="https://..."/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <select class="form-input" id="new-status">
+              <option>Live</option>
+              <option>Coming Soon</option>
+              <option>In Development</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid3">
+          <div class="form-group">
+            <label class="form-label">Tag 1</label>
+            <input type="text" class="form-input" id="new-tag1" placeholder="e.g. Action RPG"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tag 2</label>
+            <input type="text" class="form-input" id="new-tag2" placeholder="e.g. Browser"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tag 3</label>
+            <input type="text" class="form-input" id="new-tag3" placeholder="e.g. Free"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Emoji icon</label>
+          <input type="text" class="form-input" id="new-emoji" placeholder="e.g. 🎮 or 🌍 or 📱" style="width:120px;"/>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="form-btn form-btn-primary" onclick="pushToGitHub()" id="push-btn">Push to GitHub & Deploy</button>
+        <button class="form-btn" style="background:var(--gray);color:var(--muted);border:none;" onclick="previewProduct()">Preview card</button>
+        <div id="push-status" style="font-size:11px;color:var(--muted);"></div>
+      </div>
+      <div id="product-preview" style="margin-top:1rem;display:none;"></div>
+    </div>
+  </div>
+
+  <!-- GO LIVE -->
+  <div id="pg-golive" class="pg" style="display:none;">
+    <div class="card">
+      <div class="card-title">Overall launch readiness</div>
+      <div class="prog-row" style="margin-top:6px;">
+        <div class="prog-lbl">Zedforge Studio</div>
+        <div class="prog-bar"><div class="prog-fill" id="launch-bar" style="width:0%;"></div></div>
+        <div class="prog-pct" id="launch-pct">0%</div>
+      </div>
+    </div>
+    <div id="golive-list"></div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div id="pg-settings" class="pg" style="display:none;">
+    <div class="card">
+      <div class="card-title">GitHub integration</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:1rem;">Add your GitHub Personal Access Token to enable the Site Editor to push changes directly to your repository — no coding needed.</div>
+      <div class="settings-box">
+        <div class="lbl">GitHub Personal Access Token</div>
+        <input type="password" class="form-input" id="gh-token-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" style="margin-bottom:8px;font-family:monospace;"/>
+        <div class="grid2" style="margin-bottom:0;">
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">GitHub username</label>
+            <input type="text" class="form-input" id="gh-user-input" placeholder="Sedolf" value="Sedolf"/>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Repository name</label>
+            <input type="text" class="form-input" id="gh-repo-input" placeholder="zedforge-studio" value="zedforge-studio"/>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px;">
+          <button class="form-btn form-btn-primary" onclick="saveGitHubSettings()">Save settings</button>
+          <button class="form-btn" style="background:var(--gray);color:var(--muted);border:none;" onclick="testGitHubConnection()">Test connection</button>
+        </div>
+        <div id="gh-status" style="margin-top:8px;font-size:11px;color:var(--muted);"></div>
+      </div>
+      <div class="settings-box" style="margin-top:10px;">
+        <div class="lbl">Token instructions</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.8;">
+          1. Go to <strong style="color:var(--text);">github.com → Settings → Developer settings → Personal access tokens → Tokens (classic)</strong><br/>
+          2. Click <strong style="color:var(--text);">"Generate new token (classic)"</strong><br/>
+          3. Give it a name like <strong style="color:var(--text);">"Zedforge HQ"</strong><br/>
+          4. Set expiration to <strong style="color:var(--text);">No expiration</strong><br/>
+          5. Under scopes, check <strong style="color:var(--text);">"repo"</strong> (full control of private repositories)<br/>
+          6. Click <strong style="color:var(--text);">"Generate token"</strong><br/>
+          7. Copy the token immediately — you won't see it again<br/>
+          8. Paste it above and click Save
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Data management</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Your task progress, ideas, and settings are saved in your browser's local storage.</div>
+      <div style="display:flex;gap:8px;">
+        <button class="form-btn" style="background:var(--gray);color:var(--muted);border:none;" onclick="exportData()">Export data</button>
+        <button class="form-btn form-btn-danger" onclick="clearData()">Clear all data</button>
+      </div>
+    </div>
+  </div>
+
+  </div><!-- end content -->
+</div><!-- end main -->
+</div><!-- end app -->
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal-box">
+    <div class="modal-title" id="modal-title">Confirm</div>
+    <div id="modal-body" style="font-size:12px;color:var(--muted);margin-bottom:1rem;"></div>
+    <div style="display:flex;gap:8px;">
+      <button class="form-btn form-btn-primary" id="modal-confirm">Confirm</button>
+      <button class="form-btn" style="background:var(--gray);color:var(--muted);border:none;" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// DATA
+const pillars = [
+  {id:'brand',name:'Brand identity',tasks:['Design Z-anvil logo (full, compact, icon, wordmark)','Export logo in SVG & PNG formats','Create brand guidelines document','Set up brand color swatches','Finalise Space Grotesk font usage']},
+  {id:'mainsite',name:'Main website',tasks:['Check zedforgestudio.com availability','Purchase domain','Design website layout','Write all website copy','Build & deploy website','Test on mobile & desktop']},
+  {id:'lorewell',name:'Lorewell',tasks:['Write Lorewell tagline','Build Lorewell platform','Write first cultural articles','Set up press email','Launch Lorewell beta','Add more stories regularly']},
+  {id:'sgc',name:'Shadow Gate Chronicles',tasks:['Write full game description','Take gameplay screenshots (min 3)','Record gameplay trailer','Set game price','Upload game to itch.io','Create game page on main site','Announce on social media']},
+  {id:'snakes',name:'Snakes Evolution',tasks:['Write full game description','Take gameplay screenshots (min 3)','Record gameplay trailer','Set game price','Upload game to itch.io','Create game page on main site','Announce on social media']},
+  {id:'bizplan',name:'Business plan',tasks:['Write IT services offering','Set pricing for IT services','Research competitors','Document full business plan','Set up business email']},
+  {id:'legal',name:'Legal & structure',tasks:['Create itch.io studio account','Choose company type','Choose registration country','Register Zedforge Studio','Open business bank account','Set up Wise Business or Payoneer','Set up payment processing','Register for Ghana tax (GRA)']},
+];
+
+// STATE - persisted in localStorage
+function loadState() {
+  try { return JSON.parse(localStorage.getItem('zf_state')) || pillars.map(p=>p.tasks.map(()=>false)); }
+  catch(e) { return pillars.map(p=>p.tasks.map(()=>false)); }
+}
+function saveState() { localStorage.setItem('zf_state', JSON.stringify(state)); }
+
+let state = loadState();
+
+function loadIdeas() {
+  try { return JSON.parse(localStorage.getItem('zf_ideas')) || ['Check if zedforgestudio.com domain is available','Create itch.io account as zedforgestudio — free & easy','Start Ghanaian culture as first Lorewell content','Consider Wise Business for global payments','Prince\'s role to be confirmed — CTO? COO?']; }
+  catch(e) { return []; }
+}
+function saveIdeas() { localStorage.setItem('zf_ideas', JSON.stringify(ideas)); }
+let ideas = loadIdeas();
+
+function loadGHSettings() {
+  try { return JSON.parse(localStorage.getItem('zf_gh')) || {token:'',user:'Sedolf',repo:'zedforge-studio'}; }
+  catch(e) { return {token:'',user:'Sedolf',repo:'zedforge-studio'}; }
+}
+function saveGHSettings(s) { localStorage.setItem('zf_gh', JSON.stringify(s)); }
+let ghSettings = loadGHSettings();
+
+// NAV
+const pages = ['dashboard','profile','mainsite','lorewell','sgc','snakes','bizplan','legal','tasks','brainstorm','editor','golive','settings'];
+const pageTitles = {dashboard:'Dashboard',profile:'Company profile',mainsite:'Main website',lorewell:'Lorewell',sgc:'Shadow Gate Chronicles',snakes:'Snakes Evolution',bizplan:'Business plan',legal:'Legal & structure',tasks:'All tasks',brainstorm:'Brainstorm board',editor:'Site editor',golive:'Go live',settings:'Settings'};
+
+function nav(page) {
+  pages.forEach(p => {
+    document.getElementById('pg-'+p).style.display = p===page?'block':'none';
+  });
+  document.querySelectorAll('.sb-item').forEach(el => {
+    el.classList.toggle('active', (el.getAttribute('onclick')||'').includes("'"+page+"'"));
+  });
+  document.getElementById('topbar-title').textContent = pageTitles[page]||page;
+  renderAll();
+}
+
+function pi(id){return pillars.findIndex(p=>p.id===id);}
+
+function toggle(pii,ti){
+  state[pii][ti]=!state[pii][ti];
+  saveState();
+  renderAll();
+}
+
+function renderTasks(elId,pillarId){
+  const el=document.getElementById(elId);if(!el)return;
+  const pii=pi(pillarId);
+  el.innerHTML=pillars[pii].tasks.map((t,ti)=>`
+    <div class="task-row" onclick="toggle(${pii},${ti})">
+      <div class="tcheck ${state[pii][ti]?'done':''}"></div>
+      <div class="tlbl ${state[pii][ti]?'done':''}">${t}</div>
+    </div>`).join('');
+}
+
+function renderAllTasks(){
+  const el=document.getElementById('all-tasks');if(!el)return;
+  el.innerHTML=pillars.map((p,pii)=>`
+    <div class="card">
+      <div class="card-title">${p.name} <span style="font-size:10px;color:var(--muted);font-weight:400;">${state[pii].filter(Boolean).length}/${state[pii].length} done</span></div>
+      ${p.tasks.map((t,ti)=>`
+        <div class="task-row" onclick="toggle(${pii},${ti})">
+          <div class="tcheck ${state[pii][ti]?'done':''}"></div>
+          <div class="tlbl ${state[pii][ti]?'done':''}">${t}</div>
+          <div class="ttag">${p.name}</div>
+        </div>`).join('')}
+    </div>`).join('');
+}
+
+function renderDashboard(){
+  const flat=state.flat();
+  const done=flat.filter(Boolean).length;
+  const total=flat.length;
+  const pct=Math.round(done/total*100);
+  document.getElementById('d-pct').textContent=pct+'%';
+  document.getElementById('d-done').textContent=done;
+  document.getElementById('d-total-note').textContent='of '+total+' total';
+  const prog=document.getElementById('d-progress');
+  if(prog)prog.innerHTML=pillars.map((p,pii)=>{
+    const d=state[pii].filter(Boolean).length;
+    const pc=Math.round(d/state[pii].length*100);
+    return`<div class="prog-row"><div class="prog-lbl">${p.name}</div><div class="prog-bar"><div class="prog-fill" style="width:${pc}%;"></div></div><div class="prog-pct">${pc}%</div></div>`;
+  }).join('');
+  const next=document.getElementById('d-next');
+  if(next){
+    const items=[];
+    pillars.forEach((p,pii)=>p.tasks.forEach((t,ti)=>{if(!state[pii][ti]&&items.length<6)items.push({t,pii,ti,name:p.name});}));
+    next.innerHTML=items.map(({t,pii,ti,name})=>`
+      <div class="task-row" onclick="toggle(${pii},${ti})">
+        <div class="tcheck"></div><div class="tlbl">${t}</div><div class="ttag">${name}</div>
+      </div>`).join('')||'<div style="font-size:12px;color:var(--muted);padding:6px 0;">All tasks complete — ready to go live! 🎉</div>';
+  }
+}
+
+function renderGoLive(){
+  const el=document.getElementById('golive-list');if(!el)return;
+  el.innerHTML=pillars.map((p,pii)=>{
+    const done=state[pii].filter(Boolean).length;
+    const total=state[pii].length;
+    const pct=Math.round(done/total*100);
+    const ready=pct===100;
+    return`<div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div style="font-size:12px;font-weight:600;color:var(--text);">${p.name}</div>
+        <span class="badge ${ready?'bgr':'bam'}">${ready?'Ready ✓':pct+'%'}</span>
+      </div>
+      <div class="prog-bar" style="height:5px;margin-bottom:4px;"><div class="prog-fill" style="width:${pct}%;"></div></div>
+      <div style="font-size:10px;color:var(--muted);">${done} of ${total} tasks done</div>
+    </div>`;
+  }).join('');
+  const flat=state.flat();
+  const lp=Math.round(flat.filter(Boolean).length/flat.length*100);
+  document.getElementById('launch-bar').style.width=lp+'%';
+  document.getElementById('launch-pct').textContent=lp+'%';
+}
+
+function renderIdeas(){
+  const el=document.getElementById('ideas-list');if(!el)return;
+  el.innerHTML=ideas.length?ideas.map((idea,i)=>`
+    <div class="idea-row">
+      <div class="idea-dot"></div><span style="flex:1;">${idea}</span>
+      <span class="idea-del" onclick="removeIdea(${i})">✕</span>
+    </div>`).join(''):'<div style="font-size:12px;color:var(--muted);">No ideas yet — add one above.</div>';
+}
+
+function addIdea(){
+  const inp=document.getElementById('idea-inp');
+  if(!inp||!inp.value.trim())return;
+  ideas.push(inp.value.trim());inp.value='';
+  saveIdeas();renderIdeas();
+}
+
+function removeIdea(i){ideas.splice(i,1);saveIdeas();renderIdeas();}
+
+function renderAll(){
+  renderDashboard();
+  renderTasks('mainsite-tasks','mainsite');
+  renderTasks('lorewell-tasks','lorewell');
+  renderTasks('sgc-tasks','sgc');
+  renderTasks('snakes-tasks','snakes');
+  renderTasks('legal-tasks','legal');
+  renderAllTasks();
+  renderIdeas();
+  renderGoLive();
+  // Load GH settings into form
+  const ti=document.getElementById('gh-token-input');
+  const ui=document.getElementById('gh-user-input');
+  const ri=document.getElementById('gh-repo-input');
+  if(ti)ti.value=ghSettings.token?'••••••••••••••••••••':'';
+  if(ui)ui.value=ghSettings.user;
+  if(ri)ri.value=ghSettings.repo;
+  // Show warning in editor if no token
+  const warn=document.getElementById('github-warning');
+  if(warn)warn.style.display=ghSettings.token?'none':'block';
+}
+
+// GITHUB SETTINGS
+function saveGitHubSettings(){
+  const t=document.getElementById('gh-token-input').value;
+  const u=document.getElementById('gh-user-input').value;
+  const r=document.getElementById('gh-repo-input').value;
+  if(!u||!r){showToast('Please fill in username and repo name.','error');return;}
+  ghSettings={token:t&&!t.includes('•')?t:ghSettings.token,user:u,repo:r};
+  saveGHSettings(ghSettings);
+  showToast('Settings saved!','success');
+  renderAll();
+}
+
+async function testGitHubConnection(){
+  const statusEl=document.getElementById('gh-status');
+  statusEl.textContent='Testing connection...';
+  statusEl.style.color='var(--muted)';
+  if(!ghSettings.token){statusEl.textContent='❌ No token saved. Add your token first.';statusEl.style.color='var(--red)';return;}
+  try{
+    const res=await fetch(`https://api.github.com/repos/${ghSettings.user}/${ghSettings.repo}`,{headers:{'Authorization':'token '+ghSettings.token,'Accept':'application/vnd.github.v3+json'}});
+    if(res.ok){statusEl.textContent='✅ Connected! Repository found.';statusEl.style.color='var(--green)';}
+    else{statusEl.textContent='❌ Connection failed. Check your token and repo name.';statusEl.style.color='var(--red)';}
+  }catch(e){statusEl.textContent='❌ Network error. Try again.';statusEl.style.color='var(--red)';}
+}
+
+// SITE EDITOR - PUSH TO GITHUB
+async function pushToGitHub(){
+  if(!ghSettings.token){showToast('Add your GitHub token in Settings first.','error');nav('settings');return;}
+  const name=document.getElementById('new-name').value.trim();
+  const type=document.getElementById('new-type').value;
+  const desc=document.getElementById('new-desc').value.trim();
+  const url=document.getElementById('new-url').value.trim();
+  const status=document.getElementById('new-status').value;
+  const tag1=document.getElementById('new-tag1').value.trim();
+  const tag2=document.getElementById('new-tag2').value.trim();
+  const tag3=document.getElementById('new-tag3').value.trim();
+  const emoji=document.getElementById('new-emoji').value.trim()||'📦';
+  if(!name||!desc){showToast('Please fill in product name and description.','error');return;}
+  const btn=document.getElementById('push-btn');
+  const statusEl=document.getElementById('push-status');
+  btn.textContent='Fetching current file...';
+  btn.disabled=true;
+  statusEl.textContent='';
+  try{
+    // Get current index.html from GitHub
+    const getRes=await fetch(`https://api.github.com/repos/${ghSettings.user}/${ghSettings.repo}/contents/index.html`,{headers:{'Authorization':'token '+ghSettings.token,'Accept':'application/vnd.github.v3+json'}});
+    if(!getRes.ok)throw new Error('Could not fetch index.html from GitHub. Check your token and repo name.');
+    const fileData=await getRes.json();
+    const currentContent=atob(fileData.content.replace(/\n/g,''));
+    const sha=fileData.sha;
+    // Build new product card HTML
+    const badgeClass=status==='Live'?'badge-live':status==='Coming Soon'?'badge-soon':'badge-coming';
+    const badgeStyle=status==='Live'?'background:rgba(29,158,117,0.2);color:#5DCAA5;border:0.5px solid rgba(29,158,117,0.3);':'background:rgba(239,159,39,0.2);color:#EF9F27;border:0.5px solid rgba(239,159,39,0.3);';
+    const tags=[tag1,tag2,tag3].filter(Boolean).map(t=>`<span class="product-tag">${t}</span>`).join('');
+    const linkText=status==='Live'?'Visit →':'Get notified →';
+    const newCard=`
+      <div class="product-card">
+        <div class="product-thumb" style="background:var(--navy);">
+          <div class="product-thumb-pattern" style="background:repeating-linear-gradient(45deg,rgba(55,138,221,0.1),rgba(55,138,221,0.1) 10px,transparent 10px,transparent 20px);"></div>
+          <div class="product-thumb-icon">${emoji}</div>
+          <div class="product-thumb-badge" style="${badgeStyle}">${status.toUpperCase()}</div>
+        </div>
+        <div class="product-body">
+          <div class="product-type">${type}</div>
+          <div class="product-name">${name}</div>
+          <div class="product-desc">${desc}</div>
+          <div class="product-tags">${tags}</div>
+          <a href="${url||'#contact'}" target="_blank" class="product-link">${linkText}</a>
+        </div>
+      </div>`;
+    // Find the products grid closing tag and insert before it
+    const insertMarker='</div>\n    </div>\n  </div>\n</section>\n\n<!-- SERVICES -->';
+    const altMarker='</div>\n        </div>\n    </div>\n</section>';
+    let newContent;
+    if(currentContent.includes('<!-- SERVICES -->') && currentContent.includes('products-grid')){
+      const marker='</div>\n  </div>\n</section>\n\n<!-- SERVICES -->';
+      const idx=currentContent.lastIndexOf('</div>\n  </div>\n</section>');
+      if(idx>-1){
+        newContent=currentContent.slice(0,idx)+newCard+'\n      '+currentContent.slice(idx);
+      } else {
+        newContent=currentContent.replace('<!-- SERVICES -->',newCard+'\n\n<!-- SERVICES -->');
+      }
+    } else {
+      newContent=currentContent+'<!-- product:'+name+' -->'+newCard;
+    }
+    // Push to GitHub
+    btn.textContent='Pushing to GitHub...';
+    const pushRes=await fetch(`https://api.github.com/repos/${ghSettings.user}/${ghSettings.repo}/contents/index.html`,{
+      method:'PUT',
+      headers:{'Authorization':'token '+ghSettings.token,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
+      body:JSON.stringify({message:`Add product: ${name}`,content:btoa(unescape(encodeURIComponent(newContent))),sha:sha})
+    });
+    if(!pushRes.ok){const err=await pushRes.json();throw new Error(err.message||'Push failed');}
+    btn.textContent='Push to GitHub & Deploy';
+    btn.disabled=false;
+    showToast('✅ Pushed! Vercel is redeploying. Live in ~30 seconds.','success');
+    statusEl.textContent='';
+    // Clear form
+    ['new-name','new-desc','new-url','new-tag1','new-tag2','new-tag3','new-emoji'].forEach(id=>{document.getElementById(id).value='';});
+  }catch(e){
+    btn.textContent='Push to GitHub & Deploy';
+    btn.disabled=false;
+    showToast('❌ '+e.message,'error');
+    statusEl.textContent='Error: '+e.message;
+  }
+}
+
+function previewProduct(){
+  const name=document.getElementById('new-name').value.trim()||'Product name';
+  const type=document.getElementById('new-type').value;
+  const desc=document.getElementById('new-desc').value.trim()||'Product description goes here.';
+  const emoji=document.getElementById('new-emoji').value.trim()||'📦';
+  const status=document.getElementById('new-status').value;
+  const tag1=document.getElementById('new-tag1').value.trim();
+  const tag2=document.getElementById('new-tag2').value.trim();
+  const tag3=document.getElementById('new-tag3').value.trim();
+  const tags=[tag1,tag2,tag3].filter(Boolean);
+  const prev=document.getElementById('product-preview');
+  const statusColor=status==='Live'?'bgr':status==='Coming Soon'?'bam':'bb';
+  prev.style.display='block';
+  prev.innerHTML=`
+    <div style="background:var(--gray);border-radius:8px;padding:1rem;">
+      <div class="lbl">Preview</div>
+      <div style="background:var(--white);border:0.5px solid var(--border);border-radius:10px;overflow:hidden;max-width:280px;">
+        <div style="height:100px;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:36px;position:relative;">
+          ${emoji}
+          <span class="badge ${statusColor}" style="position:absolute;top:8px;right:8px;font-size:9px;">${status}</span>
+        </div>
+        <div style="padding:12px;">
+          <div style="font-size:9px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);margin-bottom:4px;">${type}</div>
+          <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;">${name}</div>
+          <div style="font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:8px;">${desc}</div>
+          <div style="display:flex;gap:4px;flex-wrap:wrap;">${tags.map(t=>`<span style="font-size:9px;padding:2px 8px;border-radius:99px;background:var(--gray);color:var(--muted);">${t}</span>`).join('')}</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+// TOAST
+function showToast(msg,type='info'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast '+type;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+// MODAL
+function closeModal(){document.getElementById('modal').classList.remove('show');}
+
+// DATA EXPORT/CLEAR
+function exportData(){
+  const data={state,ideas,ghSettings:{user:ghSettings.user,repo:ghSettings.repo}};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='zedforge-hq-data.json';a.click();
+}
+function clearData(){
+  if(confirm('Clear all saved progress and ideas? This cannot be undone.')){
+    localStorage.removeItem('zf_state');localStorage.removeItem('zf_ideas');
+    state=pillars.map(p=>p.tasks.map(()=>false));
+    ideas=[];
+    renderAll();
+    showToast('Data cleared.','info');
+  }
+}
+
+// INIT
+renderAll();
+</script>
+</body>
+</html>
