@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Zedforge Studio — HQ Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{--navy:#042C53;--blue:#185FA5;--accent:#378ADD;--light:#E6F1FB;--pale:#B5D4F4;--dark:#031e3a;--bg:#f4f7fb;--white:#ffffff;--text:#0d1b2a;--muted:#5a7a9a;--border:rgba(24,95,165,0.12);--green:#1D9E75;--amber:#EF9F27;--red:#E24B4A;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;font-size:13px;}
+.sb{width:220px;flex-shrink:0;background:var(--navy);display:flex;flex-direction:column;min-height:100vh;position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:10;}
+.sb-head{padding:1.125rem 1rem;border-bottom:0.5px solid #0C447C;}
+.sb-logo{font-size:13px;font-weight:700;color:#E6F1FB;letter-spacing:0.06em;}
+.sb-logo span{color:#378ADD;}
+.sb-tagline{font-size:9px;color:#378ADD;margin-top:2px;letter-spacing:0.1em;}
+.sb-sec{padding:0.65rem 1rem 0.2rem;font-size:9px;letter-spacing:0.14em;color:#185FA5;text-transform:uppercase;font-weight:600;}
+.sb-item{display:flex;align-items:center;gap:8px;padding:7px 1rem;font-size:11px;color:#6b8aaa;cursor:pointer;border-left:2px solid transparent;transition:all 0.15s;text-decoration:none;}
+.sb-item:hover{color:#B5D4F4;background:rgba(255,255,255,0.04);}
+.sb-item.active{color:#E6F1FB;background:rgba(55,138,221,0.12);border-left-color:#378ADD;}
+.sb-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.sb-foot{margin-top:auto;padding:0.875rem 1rem;border-top:0.5px solid #0C447C;background:#031e3a;}
+.sb-foot-name{font-size:12px;font-weight:500;color:#B5D4F4;}
+.sb-foot-role{font-size:10px;color:#378ADD;}
+.sb-foot-badge{display:inline-block;font-size:9px;padding:1px 8px;border-radius:99px;background:#185FA5;color:#E6F1FB;margin-top:3px;}
+.main{margin-left:220px;flex:1;padding:1.5rem;min-height:100vh;}
+.pg{display:none;}
+.pg.active{display:block;}
+.pg-title{font-size:18px;font-weight:700;color:var(--text);margin-bottom:3px;letter-spacing:-0.01em;}
+.pg-sub{font-size:12px;color:var(--muted);margin-bottom:1.5rem;}
+.row2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:12px;}
+.row3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:12px;}
+.row4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:12px;}
+.card{background:var(--white);border:0.5px solid var(--border);border-radius:12px;padding:1rem 1.125rem;margin-bottom:12px;}
+.card-title{font-size:12px;font-weight:600;color:var(--text);margin-bottom:10px;}
+.metric{background:#f0f4f9;border-radius:8px;padding:0.875rem;}
+.metric-label{font-size:10px;color:var(--muted);margin-bottom:3px;}
+.metric-val{font-size:20px;font-weight:700;color:var(--text);}
+.metric-note{font-size:10px;color:var(--muted);margin-top:2px;}
+.lbl{font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:0.5px solid var(--border);}
+.info-row:last-child{border-bottom:none;}
+.ik{font-size:11px;color:var(--muted);}
+.iv{font-size:11px;font-weight:500;color:var(--text);text-align:right;max-width:240px;}
+.iv.ed{color:var(--blue);cursor:pointer;}
+.iv.ed:hover{text-decoration:underline;}
+.badge{display:inline-block;font-size:10px;padding:2px 9px;border-radius:99px;}
+.bgr{background:#EAF3DE;color:#27500A;}
+.bam{background:#FAEEDA;color:#633806;}
+.bb{background:#E6F1FB;color:#0C447C;}
+.bg{background:#f0f4f9;color:var(--muted);}
+.bred{background:#FCEBEB;color:#791F1F;}
+.prog-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.prog-lbl{font-size:11px;color:var(--text);min-width:150px;}
+.prog-bar{flex:1;height:4px;background:#e8edf2;border-radius:99px;overflow:hidden;}
+.prog-fill{height:100%;background:var(--blue);border-radius:99px;transition:width 0.4s;}
+.prog-pct{font-size:10px;color:var(--muted);min-width:30px;text-align:right;}
+.task-row{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#f8fafc;border-radius:8px;margin-bottom:5px;cursor:pointer;transition:background 0.1s;}
+.task-row:hover{background:#f0f4f9;}
+.tcheck{width:15px;height:15px;border-radius:50%;border:1.5px solid #cdd5e0;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+.tcheck.done{background:var(--blue);border-color:var(--blue);}
+.tcheck.done::after{content:'';display:block;width:4px;height:7px;border:1.5px solid white;border-top:none;border-left:none;transform:rotate(45deg) translateY(-1px);}
+.tlbl{flex:1;font-size:11px;color:var(--text);}
+.tlbl.done{color:var(--muted);text-decoration:line-through;}
+.ttag{font-size:9px;padding:2px 7px;border-radius:99px;background:var(--white);color:var(--muted);border:0.5px solid var(--border);white-space:nowrap;}
+.idea-row{display:flex;align-items:flex-start;gap:8px;padding:7px 10px;background:#f8fafc;border-radius:8px;margin-bottom:5px;font-size:11px;color:var(--text);}
+.idea-dot{width:5px;height:5px;border-radius:50%;background:var(--blue);flex-shrink:0;margin-top:4px;}
+.idea-del{margin-left:auto;font-size:10px;color:var(--muted);cursor:pointer;padding:0 2px;flex-shrink:0;}
+.idea-del:hover{color:var(--red);}
+.add-row{display:flex;gap:7px;margin-top:8px;}
+.add-inp{flex:1;font-size:12px;padding:8px 10px;border:0.5px solid #cdd5e0;border-radius:8px;background:var(--white);color:var(--text);outline:none;font-family:inherit;}
+.add-inp:focus{border-color:var(--blue);}
+.add-btn{padding:8px 14px;font-size:12px;background:var(--blue);color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:600;}
+.phase{display:flex;gap:10px;padding:10px 12px;background:#f8fafc;border-radius:8px;margin-bottom:7px;align-items:flex-start;}
+.phase-n{width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.phase-n.done{background:var(--green);}
+.phase-title{font-size:12px;font-weight:600;color:var(--text);margin-bottom:2px;}
+.phase-desc{font-size:11px;color:var(--muted);line-height:1.5;}
+.phase-time{font-size:10px;color:var(--blue);margin-top:3px;}
+.pub-item{background:#f8fafc;border:0.5px solid var(--border);border-radius:8px;padding:0.875rem;margin-bottom:8px;}
+.pub-item.ready{border-color:var(--green);background:#f0faf6;}
+.pub-title{font-size:12px;font-weight:600;color:var(--text);display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.site-link{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#f8fafc;border:0.5px solid var(--border);border-radius:8px;margin-bottom:8px;text-decoration:none;}
+.site-link:hover{border-color:var(--blue);background:var(--light);}
+.site-link-name{font-size:12px;font-weight:600;color:var(--text);}
+.site-link-url{font-size:11px;color:var(--blue);}
+.gh-panel{background:#f8fafc;border:0.5px solid var(--border);border-radius:8px;padding:1rem;margin-bottom:12px;}
+.gh-inp{width:100%;font-size:12px;padding:8px 10px;border:0.5px solid #cdd5e0;border-radius:8px;background:var(--white);color:var(--text);outline:none;font-family:inherit;margin-bottom:8px;}
+.gh-inp:focus{border-color:var(--blue);}
+.gh-btn{padding:8px 18px;font-size:12px;background:var(--blue);color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:600;margin-right:6px;margin-bottom:6px;}
+.gh-btn:hover{background:#0C447C;}
+.gh-btn.green{background:var(--green);}
+.gh-btn.green:hover{background:#0F6E56;}
+.gh-btn.red{background:var(--red);}
+.gh-btn.red:hover{background:#b91c1c;}
+.gh-btn.amber{background:var(--amber);}
+.status-msg{font-size:11px;padding:8px 12px;border-radius:6px;margin-top:8px;display:none;line-height:1.5;}
+.status-msg.success{background:#EAF3DE;color:#27500A;display:block;}
+.status-msg.error{background:#FCEBEB;color:#791F1F;display:block;}
+.status-msg.loading{background:#E6F1FB;color:#0C447C;display:block;}
+.pe-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.pe-label{font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.pe-inp{width:100%;font-size:12px;padding:7px 10px;border:0.5px solid #cdd5e0;border-radius:6px;background:var(--white);color:var(--text);outline:none;font-family:inherit;}
+.pe-inp:focus{border-color:var(--blue);}
+.pe-textarea{width:100%;font-size:12px;padding:7px 10px;border:0.5px solid #cdd5e0;border-radius:6px;background:var(--white);color:var(--text);outline:none;font-family:inherit;resize:vertical;min-height:60px;}
+.edit-inp{font-size:11px;padding:4px 8px;border:0.5px solid var(--blue);border-radius:6px;background:var(--white);color:var(--text);outline:none;width:180px;}
+.color-dot{width:14px;height:14px;border-radius:3px;display:inline-block;vertical-align:middle;margin-right:6px;}
+.logo-var{padding:8px 12px;background:#f8fafc;border-radius:6px;margin-bottom:6px;}
+.logo-var-name{font-size:11px;font-weight:600;color:var(--text);margin-bottom:2px;}
+.logo-var-desc{font-size:10px;color:var(--muted);}
+
+/* Product cards in admin */
+.prod-card{background:var(--white);border:0.5px solid var(--border);border-radius:8px;padding:1rem;margin-bottom:8px;display:flex;align-items:center;gap:12px;}
+.prod-card-icon{width:40px;height:40px;border-radius:8px;background:#f0f4f9;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.prod-card-info{flex:1;}
+.prod-card-name{font-size:12px;font-weight:600;color:var(--text);margin-bottom:3px;}
+.prod-card-meta{font-size:11px;color:var(--muted);}
+.prod-card-actions{display:flex;gap:6px;flex-shrink:0;}
+.del-btn{padding:5px 12px;font-size:11px;background:#FCEBEB;color:var(--red);border:0.5px solid rgba(226,74,74,0.3);border-radius:6px;cursor:pointer;font-family:inherit;font-weight:600;transition:all 0.15s;}
+.del-btn:hover{background:var(--red);color:white;}
+.confirm-overlay{display:none;position:fixed;inset:0;background:rgba(13,27,42,0.7);z-index:999;align-items:center;justify-content:center;}
+.confirm-overlay.show{display:flex;}
+.confirm-box{background:var(--white);border-radius:12px;padding:1.5rem;max-width:380px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.2);}
+.confirm-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px;}
+.confirm-desc{font-size:12px;color:var(--muted);margin-bottom:1.25rem;line-height:1.6;}
+.confirm-actions{display:flex;gap:8px;justify-content:flex-end;}
+.tabs{display:flex;gap:2px;margin-bottom:16px;background:#f0f4f9;border-radius:8px;padding:3px;}
+.tab{flex:1;padding:6px;text-align:center;font-size:11px;font-weight:500;color:var(--muted);cursor:pointer;border-radius:6px;transition:all 0.2s;}
+.tab.active{background:var(--white);color:var(--blue);font-weight:600;box-shadow:0 1px 4px rgba(0,0,0,0.08);}
+</style>
+</head>
+<body>
+
+<!-- CONFIRM DIALOG -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <div class="confirm-title" id="confirmTitle">Confirm delete</div>
+    <div class="confirm-desc" id="confirmDesc">Are you sure you want to remove this product from your live site? This cannot be undone without re-adding it.</div>
+    <div class="confirm-actions">
+      <button class="gh-btn" style="background:#f0f4f9;color:var(--muted);" onclick="closeConfirm()">Cancel</button>
+      <button class="gh-btn red" id="confirmBtn" onclick="executeDelete()">Delete product</button>
+    </div>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sb">
+  <div class="sb-head">
+    <div class="sb-logo">ZEDFORGE <span>STUDIO</span></div>
+    <div class="sb-tagline">FORGED FOR THE FUTURE</div>
+  </div>
+  <div class="sb-sec">Overview</div>
+  <a class="sb-item active" onclick="nav('dashboard')"><div class="sb-dot" style="background:#378ADD;"></div>Dashboard</a>
+  <a class="sb-item" onclick="nav('profile')"><div class="sb-dot" style="background:#378ADD;"></div>Company profile</a>
+  <a class="sb-item" onclick="nav('sites')"><div class="sb-dot" style="background:#1D9E75;"></div>Live sites</a>
+  <div class="sb-sec">Brand</div>
+  <a class="sb-item" onclick="nav('brand')"><div class="sb-dot" style="background:#1D9E75;"></div>Brand identity</a>
+  <div class="sb-sec">Products</div>
+  <a class="sb-item" onclick="nav('sgc')"><div class="sb-dot" style="background:#EF9F27;"></div>Shadow Gate Chronicles</a>
+  <a class="sb-item" onclick="nav('snakes')"><div class="sb-dot" style="background:#EF9F27;"></div>Snakes Evolution</a>
+  <a class="sb-item" onclick="nav('lorewell')"><div class="sb-dot" style="background:#7F77DD;"></div>Lorewell</a>
+  <a class="sb-item" onclick="nav('learnhub')"><div class="sb-dot" style="background:#1D9E75;"></div>LearnHub</a>
+  <div class="sb-sec">Business</div>
+  <a class="sb-item" onclick="nav('bizplan')"><div class="sb-dot" style="background:#378ADD;"></div>Business plan</a>
+  <a class="sb-item" onclick="nav('legal')"><div class="sb-dot" style="background:#EF9F27;"></div>Legal & structure</a>
+  <div class="sb-sec">Admin</div>
+  <a class="sb-item" onclick="nav('tasks')"><div class="sb-dot" style="background:#378ADD;"></div>All tasks</a>
+  <a class="sb-item" onclick="nav('brainstorm')"><div class="sb-dot" style="background:#378ADD;"></div>Brainstorm</a>
+  <a class="sb-item" onclick="nav('admin')"><div class="sb-dot" style="background:#E24B4A;"></div>Site admin</a>
+  <a class="sb-item" onclick="nav('golive')"><div class="sb-dot" style="background:#EF9F27;"></div>Go live</a>
+  <div class="sb-foot">
+    <div class="sb-foot-name">Sedolf Adjei</div>
+    <div class="sb-foot-role">Co-founder & CEO</div>
+    <div class="sb-foot-badge">Admin</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+<!-- DASHBOARD -->
+<div class="pg active" id="pg-dashboard">
+  <div class="pg-title">Welcome back, Sedolf 👋</div>
+  <div class="pg-sub">Zedforge Studio — full company overview</div>
+  <div class="row4">
+    <div class="metric"><div class="metric-label">Overall progress</div><div class="metric-val" id="d-pct">0%</div></div>
+    <div class="metric"><div class="metric-label">Tasks done</div><div class="metric-val" id="d-done">0</div><div class="metric-note" id="d-note">of 0 total</div></div>
+    <div class="metric"><div class="metric-label">Live sites</div><div class="metric-val">3</div><div class="metric-note">Studio · Lorewell · LearnHub</div></div>
+    <div class="metric"><div class="metric-label">Products</div><div class="metric-val">4</div><div class="metric-note">SGC · SE · Lorewell · LearnHub</div></div>
+  </div>
+  <div class="card"><div class="card-title">Progress by section</div><div id="d-progress"></div></div>
+  <div class="card"><div class="card-title">Next actions</div><div id="d-next"></div></div>
+</div>
+
+<!-- PROFILE -->
+<div class="pg" id="pg-profile">
+  <div class="pg-title">Company profile</div>
+  <div class="pg-sub">Official Zedforge Studio details</div>
+  <div class="card">
+    <div class="lbl">Co-founders</div>
+    <div class="info-row"><div class="ik">Founder 1</div><div class="iv">Sedolf Adjei</div></div>
+    <div class="info-row"><div class="ik">Role</div><div class="iv">Co-founder & CEO</div></div>
+    <div class="info-row"><div class="ik">Email</div><div class="iv">sedolfadjei@gmail.com</div></div>
+    <div class="info-row"><div class="ik">Phone</div><div class="iv">+233535314711</div></div>
+    <div class="info-row"><div class="ik">Location</div><div class="iv">Kumasi, Ghana</div></div>
+    <div class="info-row"><div class="ik">Founder 2</div><div class="iv">Prince Nti Baah</div></div>
+    <div class="info-row"><div class="ik">Partner role</div><div class="iv ed" id="p-role" onclick="editField('p-role','e.g. Co-founder & CTO')">Click to add</div></div>
+    <div class="info-row"><div class="ik">Partner email</div><div class="iv ed" id="p-email" onclick="editField('p-email','partner@email.com')">Click to add</div></div>
+  </div>
+  <div class="card">
+    <div class="lbl">Company</div>
+    <div class="info-row"><div class="ik">Name</div><div class="iv">Zedforge Studio</div></div>
+    <div class="info-row"><div class="ik">Tagline</div><div class="iv">Forged for the future.</div></div>
+    <div class="info-row"><div class="ik">Focus</div><div class="iv">Apps · Games · Software · IT services</div></div>
+    <div class="info-row"><div class="ik">Market</div><div class="iv">Global</div></div>
+    <div class="info-row"><div class="ik">Main website</div><div class="iv"><a href="https://zedforge-studio.vercel.app" target="_blank" style="color:var(--blue);">zedforge-studio.vercel.app</a></div></div>
+    <div class="info-row"><div class="ik">Lorewell</div><div class="iv"><a href="https://lorewell.vercel.app" target="_blank" style="color:var(--blue);">lorewell.vercel.app</a></div></div>
+    <div class="info-row"><div class="ik">itch.io</div><div class="iv"><a href="https://zedforgestudio.itch.io" target="_blank" style="color:var(--blue);">zedforgestudio.itch.io</a></div></div>
+    <div class="info-row"><div class="ik">Stage</div><div class="iv"><span class="badge bam">Pre-launch</span></div></div>
+  </div>
+</div>
+
+<!-- LIVE SITES -->
+<div class="pg" id="pg-sites">
+  <div class="pg-title">Live sites</div>
+  <div class="pg-sub">All Zedforge Studio web properties</div>
+  <div class="card">
+    <div class="card-title">Deployed sites</div>
+    <a class="site-link" href="https://zedforge-studio.vercel.app" target="_blank"><div><div class="site-link-name">Zedforge Studio — Main website</div><div class="site-link-url">zedforge-studio.vercel.app</div></div><span class="badge bgr">Live ✓</span></a>
+    <a class="site-link" href="https://lorewell.vercel.app" target="_blank"><div><div class="site-link-name">Lorewell — Culture platform</div><div class="site-link-url">lorewell.vercel.app</div></div><span class="badge bgr">Live ✓</span></a>
+    <a class="site-link" href="https://zedforgestudio.itch.io" target="_blank"><div><div class="site-link-name">Zedforge Studio — itch.io</div><div class="site-link-url">zedforgestudio.itch.io</div></div><span class="badge bgr">Active ✓</span></a>
+    <a class="site-link" href="#" onclick="nav('admin')"><div><div class="site-link-name">Site Admin — Add / delete products</div><div class="site-link-url">Manage via GitHub API</div></div><span class="badge bb">Admin →</span></a>
+  </div>
+</div>
+
+<!-- BRAND -->
+<div class="pg" id="pg-brand">
+  <div class="pg-title">Brand identity</div>
+  <div class="pg-sub">Zedforge Studio — locked visual identity</div>
+  <div class="card">
+    <div class="lbl">Core identity</div>
+    <div class="info-row"><div class="ik">Name</div><div class="iv">Zedforge Studio</div></div>
+    <div class="info-row"><div class="ik">Tagline</div><div class="iv">Forged for the future.</div></div>
+    <div class="info-row"><div class="ik">Vibe</div><div class="iv">Clean & professional</div></div>
+    <div class="info-row"><div class="ik">Typography</div><div class="iv">Space Grotesk</div></div>
+    <div class="info-row"><div class="ik">Status</div><div class="iv"><span class="badge bgr">Locked ✓</span></div></div>
+  </div>
+  <div class="card">
+    <div class="lbl">Color palette</div>
+    <div class="info-row"><div class="ik">Primary</div><div class="iv"><span class="color-dot" style="background:#185FA5;"></span>#185FA5 — Electric Blue</div></div>
+    <div class="info-row"><div class="ik">Dark</div><div class="iv"><span class="color-dot" style="background:#042C53;"></span>#042C53 — Deep Navy</div></div>
+    <div class="info-row"><div class="ik">Accent</div><div class="iv"><span class="color-dot" style="background:#378ADD;"></span>#378ADD — Sky Blue</div></div>
+  </div>
+  <div class="card">
+    <div class="lbl">Logo system</div>
+    <div class="logo-var"><div class="logo-var-name">Full</div><div class="logo-var-desc">Z-anvil symbol + ZEDFORGE STUDIO + tagline + rule</div></div>
+    <div class="logo-var"><div class="logo-var-name">Compact</div><div class="logo-var-desc">Symbol + ZEDFORGE (STUDIO drops below on small sizes)</div></div>
+    <div class="logo-var"><div class="logo-var-name">Icon only</div><div class="logo-var-desc">Z-anvil symbol — favicon, app icon, watermark</div></div>
+    <div class="logo-var"><div class="logo-var-name">Wordmark only</div><div class="logo-var-desc">ZEDFORGE STUDIO horizontal — for tight spaces</div></div>
+  </div>
+  <div class="card"><div class="card-title">Brand tasks</div><div id="brand-tasks"></div></div>
+</div>
+
+<!-- SGC -->
+<div class="pg" id="pg-sgc">
+  <div class="pg-title">Shadow Gate Chronicles</div>
+  <div class="pg-sub">Browser RPG · Built · Ready to publish</div>
+  <div class="card">
+    <div class="lbl">Game details</div>
+    <div class="info-row"><div class="ik">Genre</div><div class="iv">Action RPG / Dark Fantasy</div></div>
+    <div class="info-row"><div class="ik">Platform</div><div class="iv">Browser / Web</div></div>
+    <div class="info-row"><div class="ik">Price</div><div class="iv">Free with donations</div></div>
+    <div class="info-row"><div class="ik">Game URL</div><div class="iv ed" id="sgc-url" onclick="editField('sgc-url','https://...')">Click to add</div></div>
+    <div class="info-row"><div class="ik">itch.io page</div><div class="iv ed" id="sgc-itch" onclick="editField('sgc-itch','https://zedforgestudio.itch.io/...')">Not created yet</div></div>
+    <div class="info-row"><div class="ik">Build status</div><div class="iv"><span class="badge bgr">Built ✓</span></div></div>
+    <div class="info-row"><div class="ik">Publish status</div><div class="iv"><span class="badge bam">Not published</span></div></div>
+  </div>
+  <div class="card"><div class="card-title">Publish checklist</div><div id="sgc-tasks"></div></div>
+</div>
+
+<!-- SNAKES -->
+<div class="pg" id="pg-snakes">
+  <div class="pg-title">Snakes Evolution</div>
+  <div class="pg-sub">Browser arcade · Built · Ready to publish</div>
+  <div class="card">
+    <div class="lbl">Game details</div>
+    <div class="info-row"><div class="ik">Genre</div><div class="iv">Arcade / Casual</div></div>
+    <div class="info-row"><div class="ik">Platform</div><div class="iv">Browser / Web</div></div>
+    <div class="info-row"><div class="ik">Price</div><div class="iv">Free with donations</div></div>
+    <div class="info-row"><div class="ik">Game URL</div><div class="iv ed" id="se-url" onclick="editField('se-url','https://...')">Click to add</div></div>
+    <div class="info-row"><div class="ik">itch.io page</div><div class="iv ed" id="se-itch" onclick="editField('se-itch','https://zedforgestudio.itch.io/...')">Not created yet</div></div>
+    <div class="info-row"><div class="ik">Build status</div><div class="iv"><span class="badge bgr">Built ✓</span></div></div>
+    <div class="info-row"><div class="ik">Publish status</div><div class="iv"><span class="badge bam">Not published</span></div></div>
+  </div>
+  <div class="card"><div class="card-title">Publish checklist</div><div id="snakes-tasks"></div></div>
+</div>
+
+<!-- LOREWELL -->
+<div class="pg" id="pg-lorewell">
+  <div class="pg-title">Lorewell</div>
+  <div class="pg-sub">Culture & customs platform · Live</div>
+  <div class="card">
+    <div class="lbl">Details</div>
+    <div class="info-row"><div class="ik">Tagline</div><div class="iv">Explore the world's cultures.</div></div>
+    <div class="info-row"><div class="ik">Live URL</div><div class="iv"><a href="https://lorewell.vercel.app" target="_blank" style="color:var(--blue);">lorewell.vercel.app</a></div></div>
+    <div class="info-row"><div class="ik">Regions</div><div class="iv">All continents from day one</div></div>
+    <div class="info-row"><div class="ik">Revenue model</div><div class="iv ed" id="lw-rev" onclick="editField('lw-rev','Free / Freemium / Ads')">Not decided</div></div>
+    <div class="info-row"><div class="ik">Status</div><div class="iv"><span class="badge bgr">Live ✓</span></div></div>
+  </div>
+  <div class="card"><div class="card-title">Lorewell tasks</div><div id="lorewell-tasks"></div></div>
+</div>
+
+<!-- LEARNHUB -->
+<div class="pg" id="pg-learnhub">
+  <div class="pg-title">LearnHub</div>
+  <div class="pg-sub">General education platform · Zedforge Studio product</div>
+  <div class="card">
+    <div class="lbl">Details</div>
+    <div class="info-row"><div class="ik">Tagline</div><div class="iv">Learn everything. One place.</div></div>
+    <div class="info-row"><div class="ik">Type</div><div class="iv">Online learning platform</div></div>
+    <div class="info-row"><div class="ik">AI tutor</div><div class="iv">Powered by Claude (Anthropic)</div></div>
+    <div class="info-row"><div class="ik">Subjects</div><div class="iv">General education — all subjects</div></div>
+    <div class="info-row"><div class="ik">Access</div><div class="iv">Login required</div></div>
+    <div class="info-row"><div class="ik">Live URL</div><div class="iv ed" id="lh-url" onclick="editField('lh-url','https://learnhub.vercel.app')">Deploy to get URL</div></div>
+    <div class="info-row"><div class="ik">Status</div><div class="iv"><span class="badge bam">Built · Not deployed</span></div></div>
+  </div>
+  <div class="card"><div class="card-title">LearnHub tasks</div><div id="learnhub-tasks"></div></div>
+</div>
+
+<!-- BIZ PLAN -->
+<div class="pg" id="pg-bizplan">
+  <div class="pg-title">Business plan</div>
+  <div class="pg-sub">Zedforge Studio strategy & roadmap</div>
+  <div class="row3">
+    <div class="metric"><div class="metric-label">Revenue streams</div><div class="metric-val" style="font-size:12px;padding-top:4px;">Sales + IT services</div></div>
+    <div class="metric"><div class="metric-label">Products</div><div class="metric-val">4</div><div class="metric-note">2 games + 2 platforms</div></div>
+    <div class="metric"><div class="metric-label">Founders</div><div class="metric-val">2</div><div class="metric-note">Sedolf + Prince</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Launch roadmap</div>
+    <div class="phase"><div class="phase-n done">✓</div><div><div class="phase-title">Lock brand identity</div><div class="phase-time">Complete ✓</div></div></div>
+    <div class="phase"><div class="phase-n done">✓</div><div><div class="phase-title">Launch zedforge-studio.vercel.app</div><div class="phase-time">Complete ✓</div></div></div>
+    <div class="phase"><div class="phase-n done">✓</div><div><div class="phase-title">Launch Lorewell</div><div class="phase-time">Complete ✓</div></div></div>
+    <div class="phase"><div class="phase-n done">✓</div><div><div class="phase-title">Build LearnHub</div><div class="phase-time">Complete ✓</div></div></div>
+    <div class="phase"><div class="phase-n">5</div><div><div class="phase-title">Publish Shadow Gate Chronicles</div><div class="phase-desc">Upload to itch.io + add to website.</div><div class="phase-time">Up next</div></div></div>
+    <div class="phase"><div class="phase-n">6</div><div><div class="phase-title">Publish Snakes Evolution</div><div class="phase-time">Pending</div></div></div>
+    <div class="phase"><div class="phase-n">7</div><div><div class="phase-title">Deploy LearnHub</div><div class="phase-time">Pending</div></div></div>
+    <div class="phase"><div class="phase-n">8</div><div><div class="phase-title">Register Zedforge Studio legally</div><div class="phase-time">Pending</div></div></div>
+  </div>
+</div>
+
+<!-- LEGAL -->
+<div class="pg" id="pg-legal">
+  <div class="pg-title">Legal & structure</div>
+  <div class="pg-sub">Company registration, banking & compliance</div>
+  <div class="card">
+    <div class="lbl">Details</div>
+    <div class="info-row"><div class="ik">Founders</div><div class="iv">Sedolf Adjei · Prince Nti Baah</div></div>
+    <div class="info-row"><div class="ik">Based in</div><div class="iv">Kumasi, Ghana</div></div>
+    <div class="info-row"><div class="ik">Company type</div><div class="iv ed" id="l-type" onclick="editField('l-type','e.g. Ltd / LLC / Partnership')">Not decided</div></div>
+    <div class="info-row"><div class="ik">Registration country</div><div class="iv ed" id="l-country" onclick="editField('l-country','Ghana / USA / UK')">Not decided</div></div>
+    <div class="info-row"><div class="ik">Business bank</div><div class="iv ed" id="l-bank" onclick="editField('l-bank','Bank name...')">Not opened</div></div>
+    <div class="info-row"><div class="ik">Global payments</div><div class="iv ed" id="l-pay" onclick="editField('l-pay','Payoneer / Wise / Stripe Atlas')">Not set up</div></div>
+    <div class="info-row"><div class="ik">itch.io</div><div class="iv"><a href="https://zedforgestudio.itch.io" target="_blank" style="color:var(--blue);">zedforgestudio.itch.io ✓</a></div></div>
+  </div>
+  <div class="card"><div class="card-title">Legal tasks</div><div id="legal-tasks"></div></div>
+  <div class="card">
+    <div class="card-title">Recommendation</div>
+    <p style="font-size:12px;color:var(--muted);line-height:1.7;">Register as a <strong style="color:var(--text);">Limited Liability Company (Ltd)</strong> with Ghana's Registrar General's Department. For global payments, set up <strong style="color:var(--text);">Wise Business</strong> or <strong style="color:var(--text);">Payoneer</strong>. For Stripe + US banking, consider a <strong style="color:var(--text);">US LLC via Stripe Atlas</strong> (~$500 one-time).</p>
+  </div>
+</div>
+
+<!-- ALL TASKS -->
+<div class="pg" id="pg-tasks">
+  <div class="pg-title">All tasks</div>
+  <div class="pg-sub">Every action item — click to mark done</div>
+  <div id="all-tasks"></div>
+</div>
+
+<!-- BRAINSTORM -->
+<div class="pg" id="pg-brainstorm">
+  <div class="pg-title">Brainstorm board</div>
+  <div class="pg-sub">Ideas, notes and decisions</div>
+  <div class="card">
+    <div class="add-row">
+      <input class="add-inp" id="idea-inp" placeholder="Add an idea, note or decision..." onkeydown="if(event.key==='Enter')addIdea()"/>
+      <button class="add-btn" onclick="addIdea()">Add</button>
+    </div>
+    <div style="margin-top:10px;" id="ideas-list"></div>
+  </div>
+</div>
+
+<!-- SITE ADMIN -->
+<div class="pg" id="pg-admin">
+  <div class="pg-title">Site admin — GitHub integration</div>
+  <div class="pg-sub">Add and delete products on your live Zedforge Studio website</div>
+
+  <!-- Credentials -->
+  <div class="card">
+    <div class="card-title">GitHub credentials</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.6;">Enter once — saved in your browser automatically. All actions below use these credentials to update your live site via the GitHub API.</p>
+    <div class="gh-panel">
+      <div class="pe-grid">
+        <div>
+          <div class="pe-label">GitHub username</div>
+          <input class="gh-inp" id="gh-user" placeholder="e.g. Sedolf" oninput="saveCredentials()" style="margin-bottom:0;"/>
+        </div>
+        <div>
+          <div class="pe-label">Personal Access Token</div>
+          <input class="gh-inp" type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxx" oninput="saveCredentials()" style="margin-bottom:0;"/>
+        </div>
+      </div>
+      <div id="gh-status" class="status-msg"></div>
+    </div>
+  </div>
+
+  <!-- Tabs: Add / Delete -->
+  <div class="card">
+    <div class="tabs">
+      <div class="tab active" id="tab-add" onclick="switchAdminTab('add')">➕ Add product</div>
+      <div class="tab" id="tab-delete" onclick="switchAdminTab('delete')">🗑 Delete product</div>
+    </div>
+
+    <!-- ADD PRODUCT -->
+    <div id="panel-add">
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.6;">Fill in the details and click "Push to GitHub". Your live site updates in ~30 seconds via Vercel.</p>
+      <div class="pe-grid" style="margin-bottom:8px;">
+        <div><div class="pe-label">Product name</div><input class="pe-inp" id="new-name" placeholder="e.g. LearnHub"/></div>
+        <div><div class="pe-label">Product type</div><input class="pe-inp" id="new-type" placeholder="e.g. Web Platform"/></div>
+        <div><div class="pe-label">Link URL</div><input class="pe-inp" id="new-url" placeholder="https://..."/></div>
+        <div>
+          <div class="pe-label">Status badge</div>
+          <select class="pe-inp" id="new-status"><option value="FREE TO PLAY">Free to play</option><option value="LIVE">Live</option><option value="COMING SOON">Coming soon</option><option value="NEW">New</option></select>
+        </div>
+        <div style="grid-column:span 2;">
+          <div class="pe-label">Short description</div>
+          <textarea class="pe-textarea" id="new-desc" placeholder="One or two sentences about this product..."></textarea>
+        </div>
+        <div><div class="pe-label">Tags (comma separated)</div><input class="pe-inp" id="new-tags" placeholder="e.g. Education, AI, Free"/></div>
+        <div><div class="pe-label">Emoji icon</div><input class="pe-inp" id="new-icon" placeholder="e.g. 📚"/></div>
+      </div>
+      <button class="gh-btn green" onclick="pushProductToGitHub()">Push to GitHub → Go live</button>
+      <div id="push-status" class="status-msg"></div>
+    </div>
+
+    <!-- DELETE PRODUCT -->
+    <div id="panel-delete" style="display:none;">
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.6;">This fetches your current live website, scans for product cards, and lets you delete any one. The change goes live on Vercel in ~30 seconds.</p>
+      <button class="gh-btn" onclick="fetchProducts()">Fetch current products from GitHub</button>
+      <div id="fetch-status" class="status-msg"></div>
+      <div id="products-list" style="margin-top:14px;"></div>
+    </div>
+  </div>
+
+  <!-- How it works -->
+  <div class="card">
+    <div class="card-title">How this works</div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.9;">
+      <strong style="color:var(--text);">Add product:</strong> Fill the form → dashboard writes new product HTML → pushes to GitHub → Vercel redeploys in ~30 seconds.<br/>
+      <strong style="color:var(--text);">Delete product:</strong> Click "Fetch" → dashboard reads your live site → shows all product cards → click Delete on any one → confirms → pushes updated file → Vercel redeploys.<br/><br/>
+      <strong style="color:var(--text);">Your GitHub token is stored only in your browser</strong> (localStorage). It never leaves your device except to communicate directly with GitHub's API.
+    </div>
+  </div>
+</div>
+
+<!-- GO LIVE -->
+<div class="pg" id="pg-golive">
+  <div class="pg-title">Go live</div>
+  <div class="pg-sub">Launch readiness across all Zedforge Studio products</div>
+  <div class="card">
+    <div class="card-title">Overall launch readiness</div>
+    <div class="prog-row" style="margin-top:6px;">
+      <div class="prog-lbl">Zedforge Studio</div>
+      <div class="prog-bar"><div class="prog-fill" id="launch-bar" style="width:0%"></div></div>
+      <div class="prog-pct" id="launch-pct">0%</div>
+    </div>
+  </div>
+  <div id="golive-list"></div>
+</div>
+
+</div>
+
+<script>
+// ── PILLARS ───────────────────────────────────────────────────────
+const pillars=[
+  {id:'brand',name:'Brand identity',tasks:['Design Z-anvil logo (all 4 variants)','Export logo SVG & PNG','Create brand guidelines doc','Set up brand color swatches']},
+  {id:'sgc',name:'Shadow Gate Chronicles',tasks:['Write full itch.io description','Take 3+ gameplay screenshots','Upload game to itch.io','Create itch.io game page','Add game to zedforgestudio.com','Announce on social media']},
+  {id:'snakes',name:'Snakes Evolution',tasks:['Write full itch.io description','Take 3+ gameplay screenshots','Upload game to itch.io','Create itch.io game page','Add game to zedforgestudio.com','Announce on social media']},
+  {id:'lorewell',name:'Lorewell',tasks:['Write first original cultural article','Plan next 6 story topics','Set up custom domain (lorewell.com)','Write Lorewell tagline ✓']},
+  {id:'learnhub',name:'LearnHub',tasks:['Create GitHub repo (learnhub)','Deploy to Vercel','Add to Zedforge Studio website','Announce as new product']},
+  {id:'bizplan',name:'Business plan',tasks:['Define IT services pricing','Research 5 competitors','Write full business plan doc','Set up business email']},
+  {id:'legal',name:'Legal & structure',tasks:['Choose company type','Register Zedforge Studio officially','Open business bank account','Set up Wise Business or Payoneer','Register for Ghana tax (GRA)']},
+];
+
+const STORAGE_KEY='zedforge_hq_v3';
+let state,ideas,ghToken,ghUser;
+let productToDelete=null;
+
+function loadData(){
+  try{
+    const d=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');
+    state=d.state||pillars.map(p=>p.tasks.map(()=>false));
+    ideas=d.ideas||defaultIdeas();
+    ghToken=d.ghToken||''; ghUser=d.ghUser||'';
+  }catch(e){
+    state=pillars.map(p=>p.tasks.map(()=>false));
+    ideas=defaultIdeas(); ghToken=''; ghUser='';
+  }
+}
+
+function defaultIdeas(){
+  return[
+    'Check if zedforgestudio.com domain is available to purchase',
+    'Check if lorewell.com domain is available',
+    'Deploy LearnHub to its own Vercel project',
+    'Consider Wise Business for receiving global payments',
+    "Prince's role to be confirmed — CTO? COO?",
+    'Write first Lorewell original article — start with Ghanaian culture',
+  ];
+}
+
+function saveData(){
+  try{localStorage.setItem(STORAGE_KEY,JSON.stringify({state,ideas,ghToken,ghUser}));}catch(e){}
+}
+
+// ── NAV ───────────────────────────────────────────────────────────
+function nav(page){
+  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  document.getElementById('pg-'+page).classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(i=>{if((i.getAttribute('onclick')||'').includes("'"+page+"'"))i.classList.add('active');});
+  renderAll();
+  if(page==='admin'){
+    document.getElementById('gh-token').value=ghToken;
+    document.getElementById('gh-user').value=ghUser;
+  }
+}
+
+// ── TASKS ─────────────────────────────────────────────────────────
+function pi(id){return pillars.findIndex(p=>p.id===id);}
+
+function toggle(pii,ti){state[pii][ti]=!state[pii][ti];saveData();renderAll();}
+
+function renderTasks(elId,pillarId){
+  const el=document.getElementById(elId);if(!el)return;
+  const pii=pi(pillarId);
+  el.innerHTML=pillars[pii].tasks.map((t,ti)=>`
+    <div class="task-row" onclick="toggle(${pii},${ti})">
+      <div class="tcheck ${state[pii][ti]?'done':''}"></div>
+      <div class="tlbl ${state[pii][ti]?'done':''}">${t}</div>
+    </div>`).join('');
+}
+
+function renderAllTasks(){
+  const el=document.getElementById('all-tasks');if(!el)return;
+  el.innerHTML=pillars.map((p,pii)=>`
+    <div class="card">
+      <div class="card-title">${p.name} <span style="font-size:10px;color:var(--muted);font-weight:400;">${state[pii].filter(Boolean).length}/${state[pii].length} done</span></div>
+      ${p.tasks.map((t,ti)=>`
+        <div class="task-row" onclick="toggle(${pii},${ti})">
+          <div class="tcheck ${state[pii][ti]?'done':''}"></div>
+          <div class="tlbl ${state[pii][ti]?'done':''}">${t}</div>
+          <div class="ttag">${p.name}</div>
+        </div>`).join('')}
+    </div>`).join('');
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────────────
+function renderDashboard(){
+  const flat=state.flat();
+  const done=flat.filter(Boolean).length;
+  const total=flat.length;
+  const pct=Math.round(done/total*100);
+  document.getElementById('d-pct').textContent=pct+'%';
+  document.getElementById('d-done').textContent=done;
+  document.getElementById('d-note').textContent='of '+total+' total';
+  const prog=document.getElementById('d-progress');
+  if(prog)prog.innerHTML=pillars.map((p,pii)=>{
+    const d=state[pii].filter(Boolean).length;
+    const pc=Math.round(d/state[pii].length*100);
+    return`<div class="prog-row"><div class="prog-lbl">${p.name}</div><div class="prog-bar"><div class="prog-fill" style="width:${pc}%"></div></div><div class="prog-pct">${pc}%</div></div>`;
+  }).join('');
+  const next=document.getElementById('d-next');
+  if(next){
+    const items=[];
+    pillars.forEach((p,pii)=>p.tasks.forEach((t,ti)=>{if(!state[pii][ti]&&items.length<6)items.push({t,pii,ti,name:p.name});}));
+    next.innerHTML=items.map(({t,pii,ti,name})=>`
+      <div class="task-row" onclick="toggle(${pii},${ti})">
+        <div class="tcheck"></div><div class="tlbl">${t}</div><div class="ttag">${name}</div>
+      </div>`).join('')||'<div style="font-size:12px;color:var(--muted);padding:8px 0;">All tasks complete — ready to go live! 🚀</div>';
+  }
+}
+
+// ── GO LIVE ───────────────────────────────────────────────────────
+function renderGoLive(){
+  const el=document.getElementById('golive-list');if(!el)return;
+  el.innerHTML=pillars.map((p,pii)=>{
+    const done=state[pii].filter(Boolean).length;
+    const total=state[pii].length;
+    const pct=Math.round(done/total*100);
+    const ready=pct===100;
+    return`<div class="pub-item ${ready?'ready':''}">
+      <div class="pub-title">${p.name}<span class="badge ${ready?'bgr':'bam'}">${ready?'Ready ✓':pct+'%'}</span></div>
+      <div class="prog-bar" style="margin-bottom:6px;"><div class="prog-fill" style="width:${pct}%"></div></div>
+      <div style="font-size:10px;color:var(--muted);">${done} of ${total} tasks done</div>
+    </div>`;
+  }).join('');
+  const flat=state.flat();
+  const lp=Math.round(flat.filter(Boolean).length/flat.length*100);
+  document.getElementById('launch-bar').style.width=lp+'%';
+  document.getElementById('launch-pct').textContent=lp+'%';
+}
+
+// ── IDEAS ─────────────────────────────────────────────────────────
+function renderIdeas(){
+  const el=document.getElementById('ideas-list');if(!el)return;
+  el.innerHTML=ideas.length?ideas.map((idea,i)=>`
+    <div class="idea-row">
+      <div class="idea-dot"></div><span style="flex:1;">${idea}</span>
+      <span class="idea-del" onclick="removeIdea(${i})">✕</span>
+    </div>`).join(''):'<div style="font-size:12px;color:var(--muted);">No ideas yet.</div>';
+}
+
+function addIdea(){
+  const inp=document.getElementById('idea-inp');
+  if(!inp||!inp.value.trim())return;
+  ideas.push(inp.value.trim());inp.value='';saveData();renderIdeas();
+}
+
+function removeIdea(i){ideas.splice(i,1);saveData();renderIdeas();}
+
+// ── EDIT FIELDS ───────────────────────────────────────────────────
+function editField(id,placeholder){
+  const el=document.getElementById(id);if(!el)return;
+  const cur=el.textContent.match(/Click to add|Not |check|Deploy/)?'':el.textContent;
+  el.innerHTML=`<input class="edit-inp" value="${cur}" placeholder="${placeholder}" onblur="saveField('${id}',this.value)" onkeydown="if(event.key==='Enter')this.blur()"/>`;
+  el.querySelector('input').focus();
+}
+
+function saveField(id,val){
+  const el=document.getElementById(id);if(!el)return;
+  el.innerHTML='';
+  if(val.trim()){el.className='iv';el.textContent=val.trim();}
+  else{el.className='iv ed';el.textContent='Click to add';}
+}
+
+// ── CREDENTIALS ───────────────────────────────────────────────────
+function saveCredentials(){
+  ghToken=document.getElementById('gh-token').value;
+  ghUser=document.getElementById('gh-user').value;
+  saveData();
+}
+
+function showStatus(elId,msg,type){
+  const el=document.getElementById(elId);
+  if(!el)return;
+  el.textContent=msg;el.className='status-msg '+type;
+}
+
+// ── ADMIN TABS ────────────────────────────────────────────────────
+function switchAdminTab(tab){
+  document.getElementById('panel-add').style.display=tab==='add'?'block':'none';
+  document.getElementById('panel-delete').style.display=tab==='delete'?'block':'none';
+  document.getElementById('tab-add').classList.toggle('active',tab==='add');
+  document.getElementById('tab-delete').classList.toggle('active',tab==='delete');
+}
+
+// ── ADD PRODUCT ───────────────────────────────────────────────────
+async function pushProductToGitHub(){
+  const token=document.getElementById('gh-token').value.trim();
+  const user=document.getElementById('gh-user').value.trim();
+  if(!token||!user){showStatus('push-status','Please enter your GitHub token and username first.','error');return;}
+  const name=document.getElementById('new-name').value.trim();
+  const type=document.getElementById('new-type').value.trim();
+  const desc=document.getElementById('new-desc').value.trim();
+  const url=document.getElementById('new-url').value.trim()||'#';
+  const tagsRaw=document.getElementById('new-tags').value.trim();
+  const status=document.getElementById('new-status').value;
+  const icon=document.getElementById('new-icon').value.trim()||'📦';
+  if(!name||!desc){showStatus('push-status','Please fill in at least the product name and description.','error');return;}
+  showStatus('push-status','Fetching current website from GitHub...','loading');
+  const repo='zedforge-studio';
+  const apiUrl=`https://api.github.com/repos/${user}/${repo}/contents/index.html`;
+  try{
+    const getRes=await fetch(apiUrl,{headers:{'Authorization':'token '+token,'Accept':'application/vnd.github.v3+json'}});
+    if(!getRes.ok){showStatus('push-status','Could not fetch repo. Check your token and username.','error');return;}
+    const fileData=await getRes.json();
+    const currentContent=atob(fileData.content.replace(/\n/g,''));
+    const sha=fileData.sha;
+    const isFree=status==='FREE TO PLAY';
+    const tags=(tagsRaw||'').split(',').map(t=>`<span class="product-tag">${t.trim()}</span>`).join('');
+    const newCard=`\n      <div class="product-card">\n        <div class="product-thumb" style="background:#0d1a2a;">\n          <div class="product-thumb-pattern" style="background:repeating-linear-gradient(45deg,rgba(55,138,221,0.08),rgba(55,138,221,0.08) 10px,transparent 10px,transparent 20px);"></div>\n          <div class="product-thumb-icon">${icon}</div>\n          <div class="product-thumb-badge ${isFree?'badge-live':'badge-soon'}">${status}</div>\n        </div>\n        <div class="product-body">\n          <div class="product-type">${type}</div>\n          <div class="product-name">${name}</div>\n          <div class="product-desc">${desc}</div>\n          <div class="product-tags">${tags}</div>\n          <a href="${url}" target="_blank" class="product-link">Learn more →</a>\n        </div>\n      </div>`;
+    const marker='</div>\n    </div>\n  </div>\n</section>\n\n<!-- SERVICES -->';
+    let newContent;
+    if(currentContent.includes(marker)){newContent=currentContent.replace(marker,newCard+'\n\n    '+marker);}
+    else{showStatus('push-status','Could not find insertion point. The site HTML structure may have changed.','error');return;}
+    showStatus('push-status','Pushing to GitHub...','loading');
+    const encoded=btoa(unescape(encodeURIComponent(newContent)));
+    const putRes=await fetch(apiUrl,{method:'PUT',headers:{'Authorization':'token '+token,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},body:JSON.stringify({message:`Add product: ${name}`,content:encoded,sha})});
+    if(putRes.ok){
+      showStatus('push-status',`✓ "${name}" pushed! Your live site will update in ~30 seconds.`,'success');
+      ['new-name','new-type','new-desc','new-url','new-tags','new-icon'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    }else{
+      const err=await putRes.json();
+      showStatus('push-status','GitHub error: '+(err.message||'Unknown error'),'error');
+    }
+  }catch(e){showStatus('push-status','Network error: '+e.message,'error');}
+}
+
+// ── FETCH & DELETE PRODUCTS ───────────────────────────────────────
+async function fetchProducts(){
+  const token=document.getElementById('gh-token').value.trim();
+  const user=document.getElementById('gh-user').value.trim();
+  if(!token||!user){showStatus('fetch-status','Please enter your GitHub token and username first.','error');return;}
+  showStatus('fetch-status','Fetching your live website...','loading');
+  const apiUrl=`https://api.github.com/repos/${user}/zedforge-studio/contents/index.html`;
+  try{
+    const res=await fetch(apiUrl,{headers:{'Authorization':'token '+token,'Accept':'application/vnd.github.v3+json'}});
+    if(!res.ok){showStatus('fetch-status','Could not fetch repo. Check your token and username.','error');return;}
+    const fileData=await res.json();
+    const content=atob(fileData.content.replace(/\n/g,''));
+    // Parse product cards
+    const regex=/<div class="product-card">([\s\S]*?)<\/div>\s*<\/div>\s*<\/div>/g;
+    const matches=[...content.matchAll(regex)];
+    if(!matches.length){showStatus('fetch-status','No product cards found in your site.','error');return;}
+    showStatus('fetch-status',`Found ${matches.length} product(s). Click Delete to remove one.`,'success');
+    const list=document.getElementById('products-list');
+    list.innerHTML=matches.map((m,i)=>{
+      // Extract name from product-name div
+      const nameMatch=m[0].match(/class="product-name">(.*?)<\/div>/);
+      const typeMatch=m[0].match(/class="product-type">(.*?)<\/div>/);
+      const iconMatch=m[0].match(/class="product-thumb-icon">(.*?)<\/div>/);
+      const name=nameMatch?nameMatch[1].trim():`Product ${i+1}`;
+      const type=typeMatch?typeMatch[1].trim():'';
+      const icon=iconMatch?iconMatch[1].trim():'📦';
+      return`<div class="prod-card">
+        <div class="prod-card-icon">${icon}</div>
+        <div class="prod-card-info">
+          <div class="prod-card-name">${name}</div>
+          <div class="prod-card-meta">${type}</div>
+        </div>
+        <div class="prod-card-actions">
+          <button class="del-btn" onclick="confirmDelete(${i},'${name.replace(/'/g,"\\'")}')">Delete</button>
+        </div>
+      </div>`;
+    }).join('');
+    // Store content and sha for deletion
+    window._ghContent=content;
+    window._ghSha=fileData.sha;
+    window._ghMatches=matches;
+  }catch(e){showStatus('fetch-status','Error: '+e.message,'error');}
+}
+
+function confirmDelete(idx,name){
+  productToDelete=idx;
+  document.getElementById('confirmTitle').textContent='Delete "'+name+'"?';
+  document.getElementById('confirmDesc').textContent='This will permanently remove "'+name+'" from your live Zedforge Studio website. Vercel will redeploy automatically in ~30 seconds. This cannot be undone without re-adding the product.';
+  document.getElementById('confirmOverlay').classList.add('show');
+}
+
+function closeConfirm(){
+  document.getElementById('confirmOverlay').classList.remove('show');
+  productToDelete=null;
+}
+
+async function executeDelete(){
+  closeConfirm();
+  if(productToDelete===null||!window._ghContent||!window._ghSha){
+    showStatus('fetch-status','No product selected. Please fetch products first.','error');return;
+  }
+  const token=document.getElementById('gh-token').value.trim();
+  const user=document.getElementById('gh-user').value.trim();
+  showStatus('fetch-status','Removing product and pushing to GitHub...','loading');
+  const match=window._ghMatches[productToDelete];
+  const newContent=window._ghContent.replace(match[0],'');
+  const apiUrl=`https://api.github.com/repos/${user}/zedforge-studio/contents/index.html`;
+  try{
+    const encoded=btoa(unescape(encodeURIComponent(newContent)));
+    const res=await fetch(apiUrl,{method:'PUT',headers:{'Authorization':'token '+token,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},body:JSON.stringify({message:'Delete product from site',content:encoded,sha:window._ghSha})});
+    if(res.ok){
+      showStatus('fetch-status','✓ Product deleted! Your live site will update in ~30 seconds.','success');
+      document.getElementById('products-list').innerHTML='';
+      window._ghContent=null;window._ghSha=null;window._ghMatches=null;
+      productToDelete=null;
+    }else{
+      const err=await res.json();
+      showStatus('fetch-status','GitHub error: '+(err.message||'Unknown error'),'error');
+    }
+  }catch(e){showStatus('fetch-status','Error: '+e.message,'error');}
+}
+
+// ── RENDER ALL ────────────────────────────────────────────────────
+function renderAll(){
+  renderDashboard();
+  renderTasks('brand-tasks','brand');
+  renderTasks('sgc-tasks','sgc');
+  renderTasks('snakes-tasks','snakes');
+  renderTasks('lorewell-tasks','lorewell');
+  renderTasks('learnhub-tasks','learnhub');
+  renderTasks('legal-tasks','legal');
+  renderAllTasks();
+  renderIdeas();
+  renderGoLive();
+}
+
+// ── INIT ──────────────────────────────────────────────────────────
+loadData();
+renderAll();
+</script>
+</body>
+</html>
